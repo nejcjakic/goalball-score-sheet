@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/iText-5.0.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/External/WindowsBuilder/forms-1.3.0.jar" sourcepath="/External/WindowsBuilder/forms-1.3.0-src.zip"/>
+	<classpathentry kind="lib" path="lib/hsqldb.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jcalendarbutton-1.4.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-dbutils-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

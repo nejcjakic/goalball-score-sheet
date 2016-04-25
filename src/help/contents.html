@@ -1,0 +1,82 @@
+<html>
+<table  align=left width=550 valign=top border=0 cellpadding="10">
+    <tr>
+    <td align=left>
+    <div>
+    <b><font size='8'>Goalball Clock help</font></b><br>
+    <font size='3' allign=right>version: 1.0</font><br><br>
+    <b><font size='5'>Introduction:</font></b><br>
+    Golball Clock is a countdown clock, designed specifically for Goalball competitions.<br>
+    It allows you to measure time and to display the teams playing and their
+    current score. It supports a hundreds of a seconds countdown in the last minute
+    of play and can optionally sound a buzzer when the time is complete. It can also measure time outs.
+    <br>
+    
+    <b><font size='6'>Contents:</font></b><br>
+    <ul>
+    <li><a href="#setting_clock">Setting up the clock</a></li>
+    <li><a href="#setting_teams">Setting up the teams info</a></li>
+    <li><a href="#operating_clock">Operating the countdown clock</a></li>
+    <li><a href="#operating_score">Operating the team score</a></li>
+    <li><a href="#saving_settings">Saving the settings</a></li>
+    </ul>
+    <br><br><br>
+    </div>
+    <h2><a name="setting_clock"></a>Setting up the clock</h2>
+    Clock properties are set in the 'Countdown clock settings' part of the main window.<br>
+    Start minutes and start seconds are set to 10:00 by default, but can be changed
+    by the user, in case there is a need to reset the clock during the game.<br>
+    If a user wishes to use hundreds of a second type countdown in the last minute
+    there is a checkbox to select that. If the checkbox is not selected the countdown
+    step is always one second.<br>
+    If a user wishes for the countdown clock to sound a buzzer, when the time is completed,
+    the checkbox 'Sound buzzer at end of time' must be selected.<br>
+    User also has an option to control the background and the foreground color
+    of the main clock display.
+    <br><br>
+    
+    <h2><a name="setting_teams"></a>Setting up the teams info</h2>
+    Team properties are set in the 'Teams settings' part of the main window.<br>
+    If a user wishes to display the team names and score in the countdown window
+    the checkbox 'Display team names and score' must be selected.<br>
+    In this case team names and score must be entered in the 'Left team' and 'Right team' input fields.
+    <br><br>
+    
+    <h2><a name="operating_clock"></a>Operating the countdown clock</h2>
+    To start using the countdown clock 'Start Clock' button must be pressed in the main window.<br>
+    If the display supports it the countdown clock will be displayed in full screen mode.<br>
+    The following buttons are used to operate the countdown clock:<br>
+    - 'Space' - starts and stops the clock.<br>
+    - 'CTRL + R' - Resets the clock.<br>
+    - 'Escape' - exits the countdown window and returns to the main window of the program.<br>
+    - 'T' - stops the main clock and starts the time out countdown.<br>
+    - 'CTRL + T' - stops the time out countdown.<br>
+    <br><br>
+      
+    <h2><a name="operating_score"></a>Operating the team score</h2>
+    If a user chose to display the team score as well it is located above the main clock
+    in the countdown window.<br>
+    There are four buttons to operate the teams score:<br>
+    - 'Left arrow' - increases the score of left team by one.<br>
+    - 'Right arrow' - increases the score of right team by one.<br>
+    - 'Up arrow' decreases the score of left team by one.<br>
+    - 'Down arrow' decreases the score of right team by one.<br>
+    <br><br>
+      
+    <h2><a name="saving_settings"></a>Saving the settings</h2>
+    When a user closes the program his preferences are saved to a file called
+    'GoalballClock.properties', which is created in user's home directory.<br>
+    The next time the program is started preferences are read from this file,
+    so there is no need to set them again.<br>
+    At the moment the preferences that are saved include:<br>
+    - Use hundreds for last second<br>
+    - Sound buzzer at end of time<br>
+    - Background color<br>
+    - Foreground color<br>
+    - Display team names and score<br>
+    <br><br>
+    
+   </td>
+    </tr>
+</table>
+</html>

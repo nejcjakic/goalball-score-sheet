@@ -1,0 +1,200 @@
+<project name="GoalballScoreSheet" default="compile" basedir=".">
+
+  <property name="build.compiler" value="javac1.6" />
+  <property name="build.sysclasspath" value="ignore" />
+
+  <property file="build.properties" />
+
+  <property name="version" value="1.0" />
+
+  <property name="appName" value="GoalballScoreSheet" />
+  <property name="build.home" value="${basedir}/classes" />
+  <property name="deploy.home" value="${basedir}/deploy" />
+  <property name="source" value="${basedir}/src" />
+  <property name="mainAppClass" value="${source}/si/nejcj/goalball/scoresheet/MainController.java" />
+  <property name="helpDir" value="${source}/help" />
+  <property name="webDir" value="${source}/web" />
+  <property name="jar.home" value="${deploy.home}" />
+  <property name="jar.name" value="${appName}.jar" />
+  <property name="war.name" value="${appName}.war" />
+  <property name="lib" value="${basedir}/lib" />
+  <property name="lib.signed" value="${basedir}/signedlib" />
+  <property name="keystore.name" value="goalballscoresheetkeystore" />
+  <property name="keystore.alias" value="goalballscoresheet" />
+  <property name="keystore.password" value="cliosport" />
+  <property name="mainHtmlFile" value="index.html" />
+  <property name="javadoc" value="${basedir}/doc/jdoc/${appName}" />
+
+  <property name="hostName" value="localhost:8080" />
+  <!--<property name="hostName" value="84.255.241.65:9090" />-->
+
+  <property name="mainClass" value="si.nejcj.goalball.scoresheet.GoalballScoreSheet" />
+
+  <!-- set time used to replace constants in the main class -->
+  <tstamp>
+    <format property="buildDate" pattern="yyyy-MM-dd" />
+    <format property="buildTime" pattern="HH:mm:ss" />
+  </tstamp>
+
+  <filter token="applicationName" value="${appName}" />
+  <filter token="version" value="${version}" />
+  <filter token="buildDate" value="${buildDate}" />
+  <filter token="buildTime" value="${buildTime}" />
+  <filter token="hostName" value="${hostName}" />
+
+  <path id="compile.classpath">
+    <fileset dir="${lib}">
+      <include name="*.jar" />
+      <exclude name="*.svn" />
+    </fileset>
+  </path>
+
+  <target name="clean" description="Deletes all generated files.">
+    <delete dir="${build.home}" />
+    <delete dir="${deploy.home}" />
+    <delete dir="${lib.signed}}" />
+  </target>
+
+  <target name="prepare" depends="clean" description="Creates the build destination directories">
+    <mkdir dir="${build.home}" />
+    <mkdir dir="${deploy.home}" />
+    <mkdir dir="${jar.home}" />
+
+    <copy file="${helpDir}/about.html.tok" tofile="${helpDir}/about.html" filtering="true" overwrite="true" />
+    <copy file="${helpDir}/contents.html.tok" tofile="${helpDir}/contents.html" filtering="true" overwrite="true" />
+    <copy file="${webDir}/${mainHtmlFile}.tok" tofile="${webDir}/${mainHtmlFile}" filtering="true" overwrite="true" />
+    <copy file="${webDir}/${appName}.jnlp.tok" tofile="${webDir}/${appName}.jnlp" filtering="true" overwrite="true" />
+  </target>
+
+  <target name="compile" depends="prepare, replaceBuildInfo" description="Compile Java sources">
+    <javac srcdir="${source}" destdir="${build.home}" debug="true" deprecation="false" optimize="true" listfiles="yes" fork="true" executable="C:/Installs/Java/jdk1.6.0_45/bin/javac.exe">
+      <classpath refid="compile.classpath" />
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile" description="Creates jar file">
+    <jar destfile="${jar.home}/${jar.name}" basedir="${build.home}">
+      <manifest>
+        <attribute name="Main-Class" value="${mainClass}" />
+      </manifest>
+
+      <fileset dir="${source}">
+        <include name="images/16x16/*.png" />
+        <include name="images/64x64/*.png" />
+        <include name="help/*.html" />
+        <include name="data/*.pdf" />
+        <include name="data/*.xsd" />
+        <include name="data/*.xml" />
+
+        <exclude name="help/*.tok" />
+        <exclude name="*.svn" />
+
+        <include name="sounds/*.wav" />
+        <exclude name="*.svn" />
+      </fileset>
+
+    </jar>
+  </target>
+
+  <target name="signjar" depends="jar" description="Digitally sign the jar file">
+
+    <copy todir="${lib.signed}">
+      <fileset dir="${lib}" />
+    </copy>
+    <signjar jar="${jar.home}/${jar.name}" alias="${keystore.alias}" storepass="${keystore.password}" keystore="${source}/${keystore.name}" />
+
+    <signjar alias="${keystore.alias}" storepass="${keystore.password}" keystore="${source}/${keystore.name}">
+      <fileset dir="${lib.signed}">
+        <include name="*.jar" />
+      </fileset>
+    </signjar>
+  </target>
+
+  <target name="javadoc" description="Create Javadoc API documentation">
+    <mkdir dir="${javadoc}" />
+    <javadoc destdir="${javadoc}">
+      <fileset dir="${source}">
+        <include name="**/*.java" />
+        <exclude name="**/.svn" />
+      </fileset>
+      <package name="${basedir}/lib/mail.jar/javax.mail" />
+    </javadoc>
+  </target>
+
+  <target name="deploy-jws" depends="signjar" description="Creates WebStart deployment">
+    <war destfile="${war.name}" webxml="${webDir}/${appName}.xml">
+      <fileset dir="${source}/web">
+        <exclude name="*.svn" />
+        <exclude name="*.tok" />
+        <exclude name="*.xml" />
+      </fileset>
+
+      <fileset dir="${source}/help">
+        <include name="contents.html" />
+        <include name="whatsnew.html" />
+      </fileset>
+
+      <fileset dir="${lib.signed}">
+        <include name="*.jar" />
+        <exclude name="*.svn" />
+      </fileset>
+
+      <fileset dir="${jar.home}">
+        <include name="*.jar" />
+        <exclude name="*.svn" />
+      </fileset>
+
+      <fileset dir="${source}/images/64x64">
+        <include name="Scoresheet.png" />
+        <exclude name="*.svn" />
+      </fileset>
+    </war>
+    <move file="${war.name}" todir="${deploy.home}" />
+  </target>
+
+  <target name="run" depends="jar" description="Builds and starts the application">
+    <java fork="true" classname="${mainClass}">
+      <classpath>
+        <path location="${jar.home}/${jar.name}" />
+        <fileset dir="${lib}">
+          <include name="*.jar" />
+          <exclude name="*.svn" />
+        </fileset>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="debug" depends="jar" description="Builds and starts the application">
+    <java fork="true" classname="${mainClass}">
+      <jvmarg value="-Xdebug" />
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5432" />
+      <classpath>
+        <path location="${jar.home}/${jar.name}" />
+        <fileset dir="${lib}">
+          <include name="*.jar" />
+          <exclude name="*.svn" />
+        </fileset>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="replaceBuildInfo" description="replaces values of constants in main class with current version">
+    <replaceregexp file="${mainAppClass}" match="public static final String VERSION.*;" replace="public static final String VERSION = &quot;${version}&quot;;" />
+  </target>
+
+  <target name="src-dist" description="creates source distribution" depends="prepare">
+    <zip destfile="${deploy.home}/${appName}-${version}-src.zip">
+      <zipfileset dir="${source}" includes="**/*.java" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/*.html" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/*.tok" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/*.gif" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/*.wav" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/*.jnlp" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/*.xml" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${source}" includes="**/goalballscoresheetkeystore" prefix="${appName}-${version}-src/src" />
+      <zipfileset dir="${lib}" includes="**/*.jar" prefix="${appName}-${version}-src/lib" />
+      <zipfileset dir="." includes="build.xml" fullpath="${appName}-${version}-src/build.xml" />
+    </zip>
+  </target>
+
+</project>

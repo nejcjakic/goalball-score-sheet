@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>Goalball ScoreSheet</title>
+  </head>
+  <body>
+  <hr>
+  <h1>Goalball ScoreSheet</h1>
+  <hr>
+  <br>
+  <h2>Introduction</h2>
+  <p>Coming soon</p> 
+  <br>
+  <h2>Requirements</h2>
+  <p>GoalballScoreSheet is written in Java so it can be run on any platform. In order to run it
+  <a href="http://java.com/en/download/manual.jsp">Java Runtime Environment</a> must be installed.
+  </p>
+  <h2>Downloading and updating GoalballScoreSheet</h2>
+  <p>GoalballScoreSheet can be downloaded from the following link<br>
+  <a href="http://@hostName@/GoalballScoreSheet/GoalballScoreSheet.jnlp">Goalball ScoreSheet</a><br><br>
+  After you click on the link choose an option to save the file to your computer. After you do this you will be
+  able to run the GoalballScoreSheet whenever you want, if you are connected to the internet or not.
+  However if you are connected to the internet and you decide to run the GoalballScoreSheet it will first
+  check online to see if a newer version is available. If there is a newer version available it 
+  will automatically be downloaded.<br></p>
+  <h2>Running the Goalball ScoreSheet</h2>
+  <p>After downloading the Goalball ScoreSheet from the above link, simply double click on the
+  GoalballScoreSheet.jnlp file to start the Goalball ScoreSheet. It will first display a warning asking you
+  if you trust the application's digital signature. Once you click on 'Run' Goalball ScoreSheet will start. For information about using the Goalball ScoreSheet you can
+  click <a href="http://@hostName@/GoalballScoreSheet/contents.html">here</a> or use the application's help.
+  </p>
+  <h2>Feedback and support</h2>
+  <p>Goalball ScoreSheet is developed and maintained by Nejc Jaki&#269;.<br>
+  To contact me please write to goalballclock.AT.gmail.DOT.com<br>
+  Any feedback or suggestions about the Goalball ScoreSheet will be appreciated and I will
+  do my best to fix all problems and include your suggestions in the next releases
+  as soon as possible.
+  </p>
+       
+  </body>
+</html>

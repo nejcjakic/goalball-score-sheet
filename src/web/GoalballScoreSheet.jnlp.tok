@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<jnlp codebase="http://@hostName@/GoalballScoreSheet/" href="GoalballScoreSheet.jnlp">
+  <information>
+    <title>GoalballScoreSheet</title>
+    <vendor>Nejc Jakic</vendor>
+    <description>Score sheet management application for goalball competitions.</description>
+    <icon href="Scoresheet.png"/>
+    <offline-allowed/>
+  </information>
+  <security>
+    <all-permissions/>
+  </security>
+  <resources> 
+    <j2se version="1.6+" />
+    <jar href="GoalballScoreSheet.jar" main="true" />
+    <jar href="commons-collections-3.2.1.jar"/>
+    <jar href="commons-dbutils-1.4.jar"/>
+    <jar href="commons-lang3-3.0.1.jar"/>
+    <jar href="hsqldb.jar"/>
+    <jar href="iText-5.0.6.jar"/>
+    <jar href="jcalendarbutton-1.4.5.jar"/>
+  </resources>
+  <application-desc main-class="si.nejcj.goalball.scoresheet.GoalballScoreSheet"/>
+</jnlp>
