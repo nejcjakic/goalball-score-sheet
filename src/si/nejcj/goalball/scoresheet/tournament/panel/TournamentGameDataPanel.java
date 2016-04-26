@@ -80,8 +80,8 @@ public class TournamentGameDataPanel extends JPanel {
       List<TournamentTeam> tournamentTeams,
       List<TournamentOfficial> tournamentOfficials, List<Date> tournamentDates,
       String defaultVenue) {
-    setSize(700, 430);
-    setPreferredSize(new Dimension(700, 430));
+    setSize(1100, 600);
+    setPreferredSize(new Dimension(1100, 600));
 
     List<TournamentOfficial> minorOfficials = new ArrayList<TournamentOfficial>(
         tournamentOfficials);
