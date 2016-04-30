@@ -1,16 +1,17 @@
-package si.nejcj.goalball.scoresheet.util;
+package si.nejcj.goalball.scoresheet.util.pdf;
+
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.*;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static si.nejcj.goalball.scoresheet.util.PdfFieldConstants.*;
-
 import si.nejcj.goalball.scoresheet.db.entity.TournamentGame;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentPlayer;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentStaff;
 import si.nejcj.goalball.scoresheet.db.entity.util.TournamentPlayerComparator;
+import si.nejcj.goalball.scoresheet.util.Constants;
 
 public class PdfFieldConverter {
   public static Map<String, String> createGameInformationMap(

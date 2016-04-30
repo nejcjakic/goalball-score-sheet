@@ -29,6 +29,10 @@ public class Player extends BasicEntity<Player> {
     this.firstName = firstName;
   }
 
+  public String getFullName() {
+    return lastName + " " + firstName;
+  }
+
   @Override
   public boolean hasEqualData(Player other) {
     if (firstName == null) {

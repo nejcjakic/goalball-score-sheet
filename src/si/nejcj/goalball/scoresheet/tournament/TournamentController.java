@@ -1,7 +1,7 @@
 package si.nejcj.goalball.scoresheet.tournament;
 
-import static si.nejcj.goalball.scoresheet.util.PdfFieldConstants.FIELD_TEAM_A_NAME;
-import static si.nejcj.goalball.scoresheet.util.PdfFieldConstants.FIELD_TEAM_B_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_NAME;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,9 +72,11 @@ import si.nejcj.goalball.scoresheet.util.Constants.TournamentGameTextType;
 import si.nejcj.goalball.scoresheet.util.Constants.TournamentListeners;
 import si.nejcj.goalball.scoresheet.util.Constants.TournamentTableModels;
 import si.nejcj.goalball.scoresheet.util.ErrorHandler;
-import si.nejcj.goalball.scoresheet.util.PdfFieldConstants;
-import si.nejcj.goalball.scoresheet.util.PdfFieldConverter;
-import si.nejcj.goalball.scoresheet.util.PdfUtil;
+import si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants;
+import si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConverter;
+import si.nejcj.goalball.scoresheet.util.pdf.PdfUtil;
+import si.nejcj.goalball.scoresheet.util.pdf.TournamentRefereesUtil;
+import si.nejcj.goalball.scoresheet.util.pdf.TournamentDataUtil;
 
 public class TournamentController {
   private DatabaseConnection m_dbConnection;
@@ -91,8 +93,8 @@ public class TournamentController {
   private TournamentOfficialsTableModel m_tournamentOfficialsTableModel;
   private TournamentOfficialsTableModel m_allOfficialsTableModel;
   private TournamentGamesTableModel m_tournamentGamesTableModel;
-  private static final Integer[] ALLOWED_PLAYER_NUMBERS = { null, 1, 2, 3, 4,
-      5, 6, 7, 8, 9 };
+  private static final Integer[] ALLOWED_PLAYER_NUMBERS = { null, 1, 2, 3, 4, 5,
+      6, 7, 8, 9 };
 
   public TournamentController(DatabaseConnection databaseConnection,
       ClassLoader classLoader) {
@@ -160,7 +162,8 @@ public class TournamentController {
         allOfficials.remove(official);
       }
     }
-    m_tournamentTeamsTableModel = new TournamentTeamsTableModel(tournamentTeams);
+    m_tournamentTeamsTableModel = new TournamentTeamsTableModel(
+        tournamentTeams);
     m_allTeamsTableModel = new TournamentTeamsTableModel(allTeams);
     m_tournamentOfficialsTableModel = new TournamentOfficialsTableModel(
         tournamentOfficials);
@@ -192,7 +195,8 @@ public class TournamentController {
 
     List<TournamentGame> tournamentGames = m_dbConnection
         .getTournamentGames(m_tournament.getId());
-    m_tournamentGamesTableModel = new TournamentGamesTableModel(tournamentGames);
+    m_tournamentGamesTableModel = new TournamentGamesTableModel(
+        tournamentGames);
 
     Map<TournamentTableModels, TableModel> tournamentGameTableModels = new HashMap<TournamentTableModels, TableModel>();
     tournamentGameTableModels.put(TournamentTableModels.GAMES_ALL,
@@ -227,8 +231,8 @@ public class TournamentController {
         m_tournament.setTournamentName(tournamentName);
         m_dbConnection.updateTournament(m_tournament);
       } catch (InternalTechnicalException ex) {
-        ErrorHandler.sysErr("Problem updating tournament name",
-            ex.getMessage(), ex);
+        ErrorHandler.sysErr("Problem updating tournament name", ex.getMessage(),
+            ex);
       } catch (Throwable t) {
         ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
@@ -308,16 +312,16 @@ public class TournamentController {
       if (selectedRow != -1) {
         Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
 
-        int tournamentTeamId = m_dbConnection.getTournamentTeamId(
-            m_tournament.getId(), team.getId());
+        int tournamentTeamId = m_dbConnection
+            .getTournamentTeamId(m_tournament.getId(), team.getId());
         List<TournamentPlayer> tournamentTeamPlayers = m_dbConnection
             .getTournamentTeamPlayers(tournamentTeamId);
         List<TournamentStaff> tournamentTeamStaff = m_dbConnection
             .getTournamentTeamStaff(tournamentTeamId);
-        List<TournamentStaff> staffMembers = m_dbConnection.getStaffByTeamId(
-            team.getId(), TournamentStaff.class);
-        List<TournamentPlayer> players = m_dbConnection.getPlayersByTeamId(
-            team.getId(), TournamentPlayer.class);
+        List<TournamentStaff> staffMembers = m_dbConnection
+            .getStaffByTeamId(team.getId(), TournamentStaff.class);
+        List<TournamentPlayer> players = m_dbConnection
+            .getPlayersByTeamId(team.getId(), TournamentPlayer.class);
         final TournamentStaffMembersTableModel staffTableModel = new TournamentStaffMembersTableModel(
             staffMembers, tournamentTeamStaff);
         final TournamentPlayersTableModel playersTableModel = new TournamentPlayersTableModel(
@@ -420,10 +424,10 @@ public class TournamentController {
       int selectedRow = m_tournamentPanel.getSelectedAllTeamsRow();
       if (selectedRow != -1) {
         Team team = m_allTeamsTableModel.getTeam(selectedRow);
-        List<TournamentStaff> staffMembers = m_dbConnection.getStaffByTeamId(
-            team.getId(), TournamentStaff.class);
-        List<TournamentPlayer> players = m_dbConnection.getPlayersByTeamId(
-            team.getId(), TournamentPlayer.class);
+        List<TournamentStaff> staffMembers = m_dbConnection
+            .getStaffByTeamId(team.getId(), TournamentStaff.class);
+        List<TournamentPlayer> players = m_dbConnection
+            .getPlayersByTeamId(team.getId(), TournamentPlayer.class);
         final TournamentStaffMembersTableModel staffTableModel = new TournamentStaffMembersTableModel(
             staffMembers);
         final TournamentPlayersTableModel playersTableModel = new TournamentPlayersTableModel(
@@ -494,8 +498,8 @@ public class TournamentController {
                 .getSelectedPlayers();
             List<TournamentStaff> selectedStaffMembers = staffTableModel
                 .getSelectedStaffMembers();
-            Integer tournamentTeamId = m_dbConnection.addTeamToTournament(
-                m_tournament.getId(), team.getId());
+            Integer tournamentTeamId = m_dbConnection
+                .addTeamToTournament(m_tournament.getId(), team.getId());
             for (TournamentPlayer player : selectedPlayers) {
               m_dbConnection.insertTournamentPlayer(player.getId(),
                   tournamentTeamId, player.getPlayerNumber());
@@ -528,8 +532,8 @@ public class TournamentController {
       int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
       if (selectedRow != -1) {
         Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
-        Integer tournamentTeamId = m_dbConnection.getTournamentTeamId(
-            m_tournament.getId(), team.getId());
+        Integer tournamentTeamId = m_dbConnection
+            .getTournamentTeamId(m_tournament.getId(), team.getId());
         try {
           m_dbConnection.deleteTournamentTeamData(tournamentTeamId);
           m_tournamentTeamsTableModel.removeTeam(team, selectedRow);
@@ -675,7 +679,8 @@ public class TournamentController {
           m_dbConnection.getTournamentTeams(m_tournament.getId()),
           m_dbConnection.getTournamentOfficials(m_tournament.getId()),
           calculateAvailableDates(m_tournament.getStartDate(),
-              m_tournament.getEndDate()), defaultVenue);
+              m_tournament.getEndDate()),
+          defaultVenue);
       tournamentGame.setVenue(defaultVenue);
       gameDataPanel.selectDefaultData();
       final JOptionPane optionPane = new JOptionPane(gameDataPanel,
@@ -724,8 +729,8 @@ public class TournamentController {
           tournamentGame.setId(tournamentGameId);
           m_tournamentGamesTableModel.addTournamentGame(tournamentGame);
         } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem adding tournament game",
-              ex.getMessage(), ex);
+          ErrorHandler.sysErr("Problem adding tournament game", ex.getMessage(),
+              ex);
         } catch (Throwable t) {
           ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
@@ -746,9 +751,8 @@ public class TournamentController {
 
       int selectedRow = m_tournamentPanel.getSelectedGamesRow();
       if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(m_tournamentPanel,
-            "Please select a game", "No row selected",
-            JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(m_tournamentPanel, "Please select a game",
+            "No row selected", JOptionPane.WARNING_MESSAGE);
         return;
       }
 
@@ -820,7 +824,8 @@ public class TournamentController {
           m_dbConnection.getTournamentTeams(m_tournament.getId()),
           m_dbConnection.getTournamentOfficials(m_tournament.getId()),
           calculateAvailableDates(m_tournament.getStartDate(),
-              m_tournament.getEndDate()), null);
+              m_tournament.getEndDate()),
+          null);
       gameDataPanel.setGameData(tournamentGame);
       final JOptionPane optionPane = new JOptionPane(gameDataPanel,
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
@@ -874,8 +879,8 @@ public class TournamentController {
             ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
           }
         } else if (value == JOptionPane.CANCEL_OPTION) {
-          tournamentGame = m_dbConnection.getTournamentGame(tournamentGame
-              .getId());
+          tournamentGame = m_dbConnection
+              .getTournamentGame(tournamentGame.getId());
         }
       }
     }
@@ -910,9 +915,8 @@ public class TournamentController {
           }
         }
       } else {
-        JOptionPane.showMessageDialog(m_tournamentPanel,
-            "Please select a game", "No row selected",
-            JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(m_tournamentPanel, "Please select a game",
+            "No row selected", JOptionPane.WARNING_MESSAGE);
       }
     }
   }
@@ -950,7 +954,8 @@ public class TournamentController {
   class TournamentGameGenderSelectionListener implements ActionListener {
     private TournamentGame tournamentGame;
 
-    public TournamentGameGenderSelectionListener(TournamentGame tournamentGame) {
+    public TournamentGameGenderSelectionListener(
+        TournamentGame tournamentGame) {
       this.tournamentGame = tournamentGame;
     }
 
@@ -1102,8 +1107,8 @@ public class TournamentController {
             m_tournamentGamesTableModel.getTournamentGame(selectedRow), null);
 
       } catch (InternalTechnicalException ex) {
-        ErrorHandler
-            .sysErr("Problem creating score sheet", ex.getMessage(), ex);
+        ErrorHandler.sysErr("Problem creating score sheet", ex.getMessage(),
+            ex);
       } catch (Throwable t) {
         ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
@@ -1137,8 +1142,8 @@ public class TournamentController {
 
     if (scoreSheetFile == null) {
       String defaultFileName = tournamentGame.getDefaultScoreSheetFileName();
-      fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file",
-          fileSuffix));
+      fileChooser
+          .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
       fileChooser.setSelectedFile(new File(defaultFileName));
       fileChooser.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent evt) {
@@ -1154,9 +1159,8 @@ public class TournamentController {
             }
 
             if (destFile.exists()) {
-              int selectedInd = JOptionPane.showConfirmDialog(
-                  m_tournamentPanel, "File allready exists!\n"
-                      + "Overwrite file?", "File exists",
+              int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
+                  "File allready exists!\n" + "Overwrite file?", "File exists",
                   JOptionPane.OK_CANCEL_OPTION);
 
               if (selectedInd == JOptionPane.OK_OPTION) {
@@ -1192,7 +1196,8 @@ public class TournamentController {
   }
 
   private void createOvertimeScoreeSheets(
-      Map<String, String> gameInformationMap, File parent, String baseFileName) {
+      Map<String, String> gameInformationMap, File parent,
+      String baseFileName) {
 
     final String PDF_SUFFIX = ".pdf";
 
@@ -1236,8 +1241,8 @@ public class TournamentController {
     final JFileChooser fileChooser = new JFileChooser(m_tournamentStatsSaveDir);
     fileChooser.setAcceptAllFileFilterUsed(false);
     fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-    fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file",
-        fileSuffix));
+    fileChooser
+        .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
     StringBuilder defaultFileName = new StringBuilder();
     defaultFileName.append("Tournament Stats");
     fileChooser.setSelectedFile(new File(defaultFileName.toString()));
@@ -1260,11 +1265,13 @@ public class TournamentController {
                 JOptionPane.OK_CANCEL_OPTION);
 
             if (selectedInd == JOptionPane.OK_OPTION) {
-              PdfUtil.createTournamentStats(destFile, tournamentStats);
+              TournamentRefereesUtil.createTournamentStats(destFile,
+                  tournamentStats);
             }
           } else {
             // if file is not found create and save it!
-            PdfUtil.createTournamentStats(destFile, tournamentStats);
+            TournamentRefereesUtil.createTournamentStats(destFile,
+                tournamentStats);
           }
         }
       }
@@ -1310,9 +1317,8 @@ public class TournamentController {
     public void actionPerformed(ActionEvent event) {
       int selectedRow = m_tournamentPanel.getSelectedGamesRow();
       if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(m_tournamentPanel,
-            "Please select a game", "No row selected",
-            JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(m_tournamentPanel, "Please select a game",
+            "No row selected", JOptionPane.WARNING_MESSAGE);
         return;
       }
 
@@ -1323,8 +1329,8 @@ public class TournamentController {
       final List<Integer> teamBPlayers = m_dbConnection
           .getTournamentTeamPlayerNumbers(tournamentGame.getTeamB().getId());
       final GameResultsPanel gameResultsPanel = new GameResultsPanel(
-          tournamentGame.getTeamA().getDisplayName(), tournamentGame.getTeamB()
-              .getDisplayName());
+          tournamentGame.getTeamA().getDisplayName(),
+          tournamentGame.getTeamB().getDisplayName());
       final JOptionPane optionPane = new JOptionPane(gameResultsPanel,
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
       final JDialog dialog = optionPane.createDialog(m_tournamentPanel,
@@ -1376,10 +1382,12 @@ public class TournamentController {
               .split("\\s+");
           String[] scorersTeamB = gameResultsPanel.getScorersTeamB().trim()
               .split("\\s+");
-          int finalScoreTeamA = scorersTeamA.length == 1 ? (StringUtils
-              .isBlank(scorersTeamA[0]) ? 0 : 1) : scorersTeamA.length;
-          int finalScoreTeamB = scorersTeamB.length == 1 ? (StringUtils
-              .isBlank(scorersTeamB[0]) ? 0 : 1) : scorersTeamB.length;
+          int finalScoreTeamA = scorersTeamA.length == 1
+              ? (StringUtils.isBlank(scorersTeamA[0]) ? 0 : 1)
+              : scorersTeamA.length;
+          int finalScoreTeamB = scorersTeamB.length == 1
+              ? (StringUtils.isBlank(scorersTeamB[0]) ? 0 : 1)
+              : scorersTeamB.length;
 
           StringBuilder resultString = new StringBuilder();
           resultString.append(tournamentGame.getTeamA().getDisplayName());
@@ -1421,11 +1429,11 @@ public class TournamentController {
               }
             }
 
-            m_dbConnection.setGameScore(tournamentGame.getId(),
-                finalScoreTeamA, finalScoreTeamB);
+            m_dbConnection.setGameScore(tournamentGame.getId(), finalScoreTeamA,
+                finalScoreTeamB);
             m_dbConnection.setGameScorers(tournamentGame.getId(),
-                tournamentGame.getTeamA().getId(), tournamentGame.getTeamB()
-                    .getId(), goalsTeamA, goalsTeamB);
+                tournamentGame.getTeamA().getId(),
+                tournamentGame.getTeamB().getId(), goalsTeamA, goalsTeamB);
             tournamentGame.setScoreTeamA(finalScoreTeamA);
             tournamentGame.setScoreTeamB(finalScoreTeamB);
             m_tournamentGamesTableModel.fireTableRowsUpdated(selectedRow,
@@ -1439,6 +1447,51 @@ public class TournamentController {
         }
       }
     }
+  }
+
+  public void createTeamDisplayNames() {
+    List<Team> teams = m_dbConnection
+        .getParticipatingTeams(m_tournament.getId());
+
+    final String fileSuffix = "pdf";
+    final JFileChooser fileChooser = new JFileChooser(m_tournamentStatsSaveDir);
+    fileChooser.setAcceptAllFileFilterUsed(false);
+    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+    fileChooser
+        .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
+    StringBuilder defaultFileName = new StringBuilder();
+    defaultFileName.append("Team display names");
+    fileChooser.setSelectedFile(new File(defaultFileName.toString()));
+    fileChooser.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        if (evt.getActionCommand().startsWith("Approve")) {
+          File destFile;
+          m_tournamentStatsSaveDir = fileChooser.getCurrentDirectory();
+          String fileName = fileChooser.getSelectedFile().toString();
+
+          if (fileName.endsWith("." + fileSuffix)) {
+            destFile = new File(fileName);
+          } else {
+            destFile = new File(fileName + "." + fileSuffix);
+          }
+
+          if (destFile.exists()) {
+            int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
+                "File allready exists!\n" + "Overwrite file?", "File exists",
+                JOptionPane.OK_CANCEL_OPTION);
+
+            if (selectedInd == JOptionPane.OK_OPTION) {
+              TournamentDataUtil.createTeamDisplayNames(destFile, teams);
+            }
+          } else {
+            // if file is not found create and save it!
+            TournamentDataUtil.createTeamDisplayNames(destFile, teams);
+          }
+        }
+      }
+    });
+
+    fileChooser.showSaveDialog(m_tournamentPanel);
   }
 
   public void createTournamentResults() {
@@ -1500,16 +1553,16 @@ public class TournamentController {
 
     final Map<String, List<GameResult>> finalResults = new HashMap<String, List<GameResult>>();
     for (String key : endResults.keySet()) {
-      finalResults.put(key, new ArrayList<GameResult>(endResults.get(key)
-          .values()));
+      finalResults.put(key,
+          new ArrayList<GameResult>(endResults.get(key).values()));
     }
     final String fileSuffix = "pdf";
     final JFileChooser fileChooser = new JFileChooser(
         m_tournamentResultsSaveDir);
     fileChooser.setAcceptAllFileFilterUsed(false);
     fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-    fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file",
-        fileSuffix));
+    fileChooser
+        .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
     StringBuilder defaultFileName = new StringBuilder();
     defaultFileName.append("Tournament results");
     fileChooser.setSelectedFile(new File(defaultFileName.toString()));
@@ -1532,12 +1585,14 @@ public class TournamentController {
                 JOptionPane.OK_CANCEL_OPTION);
 
             if (selectedInd == JOptionPane.OK_OPTION) {
-              PdfUtil.createTournamentResults(destFile, finalResults, endGames,
+              TournamentDataUtil.createTournamentResults(destFile, finalResults,
+                  endGames,
                   m_dbConnection.getTournamentScorers(m_tournament.getId()));
             }
           } else {
             // if file is not found create and save it!
-            PdfUtil.createTournamentResults(destFile, finalResults, endGames,
+            TournamentDataUtil.createTournamentResults(destFile, finalResults,
+                endGames,
                 m_dbConnection.getTournamentScorers(m_tournament.getId()));
           }
         }
@@ -1613,8 +1668,8 @@ public class TournamentController {
       final JFileChooser fileChooser = new JFileChooser(m_gameSheetsSaveDir);
       fileChooser.setAcceptAllFileFilterUsed(false);
       fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-      fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file",
-          fileSuffix));
+      fileChooser
+          .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
       StringBuilder defaultFileName = new StringBuilder();
       defaultFileName.append("Referees schedule ");
       defaultFileName.append(venue);
@@ -1633,18 +1688,18 @@ public class TournamentController {
             }
 
             if (destFile.exists()) {
-              int selectedInd = JOptionPane.showConfirmDialog(
-                  m_tournamentPanel, "File allready exists!\n"
-                      + "Overwrite file?", "File exists",
+              int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
+                  "File allready exists!\n" + "Overwrite file?", "File exists",
                   JOptionPane.OK_CANCEL_OPTION);
 
               if (selectedInd == JOptionPane.OK_OPTION) {
-                PdfUtil
-                    .createRefereesSchedule(destFile, tournamentGames, venue);
+                TournamentRefereesUtil.createRefereesSchedule(destFile,
+                    tournamentGames, venue);
               }
             } else {
               // if file is not found create and save it!
-              PdfUtil.createRefereesSchedule(destFile, tournamentGames, venue);
+              TournamentRefereesUtil.createRefereesSchedule(destFile,
+                  tournamentGames, venue);
             }
           }
         }

@@ -53,54 +53,38 @@ public class AddTeamPanel extends JPanel {
     countryCB = new JComboBox(countries);
 
     GroupLayout groupLayout = new GroupLayout(this);
-    groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(
-        Alignment.LEADING).addGroup(
-        groupLayout
-            .createSequentialGroup()
-            .addContainerGap()
-            .addGroup(
-                groupLayout
-                    .createParallelGroup(Alignment.LEADING, false)
-                    .addGroup(
-                        groupLayout
-                            .createSequentialGroup()
-                            .addComponent(lblTeamName)
-                            .addGap(18)
-                            .addComponent(teamNameTF,
-                                GroupLayout.PREFERRED_SIZE, 134,
-                                GroupLayout.PREFERRED_SIZE))
-                    .addGroup(
-                        groupLayout
-                            .createSequentialGroup()
-                            .addComponent(lblCountry)
-                            .addPreferredGap(ComponentPlacement.RELATED,
-                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(countryCB,
-                                GroupLayout.PREFERRED_SIZE, 134,
-                                GroupLayout.PREFERRED_SIZE))
-                    .addComponent(nationalTeamCB))
+    groupLayout.setHorizontalGroup(groupLayout
+        .createParallelGroup(Alignment.LEADING)
+        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+            .addGroup(groupLayout
+                .createParallelGroup(Alignment.LEADING, false)
+                .addGroup(groupLayout.createSequentialGroup()
+                    .addComponent(lblTeamName).addGap(18).addComponent(
+                        teamNameTF, GroupLayout.PREFERRED_SIZE,
+                        134, GroupLayout.PREFERRED_SIZE))
+                .addGroup(
+                    groupLayout.createSequentialGroup().addComponent(lblCountry)
+                        .addPreferredGap(ComponentPlacement.RELATED,
+                            GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(countryCB, GroupLayout.PREFERRED_SIZE,
+                            134, GroupLayout.PREFERRED_SIZE))
+                .addComponent(nationalTeamCB))
             .addContainerGap(29, Short.MAX_VALUE)));
-    groupLayout.setVerticalGroup(groupLayout.createParallelGroup(
-        Alignment.LEADING).addGroup(
-        groupLayout
-            .createSequentialGroup()
-            .addGap(11)
-            .addGroup(
-                groupLayout
-                    .createParallelGroup(Alignment.BASELINE)
-                    .addComponent(lblTeamName)
-                    .addComponent(teamNameTF, GroupLayout.PREFERRED_SIZE,
-                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-            .addPreferredGap(ComponentPlacement.RELATED)
-            .addComponent(nationalTeamCB)
-            .addPreferredGap(ComponentPlacement.RELATED)
-            .addGroup(
-                groupLayout
-                    .createParallelGroup(Alignment.BASELINE)
-                    .addComponent(lblCountry)
-                    .addComponent(countryCB, GroupLayout.PREFERRED_SIZE,
-                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-            .addContainerGap(32, Short.MAX_VALUE)));
+    groupLayout
+        .setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+            .addGroup(groupLayout.createSequentialGroup().addGap(11)
+                .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                    .addComponent(lblTeamName).addComponent(teamNameTF,
+                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addComponent(nationalTeamCB)
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                    .addComponent(lblCountry).addComponent(countryCB,
+                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(32, Short.MAX_VALUE)));
     setLayout(groupLayout);
   }
 
@@ -119,7 +103,7 @@ public class AddTeamPanel extends JPanel {
   public Team getTeam() {
     boolean nationalTeam = nationalTeamCB.isSelected();
     String country = (String) countryCB.getSelectedItem();
-    String teamName = teamNameTF.getText();
+    String teamName = nationalTeam ? country : teamNameTF.getText();
 
     return new Team(null, teamName, country, nationalTeam);
   }

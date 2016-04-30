@@ -1,4 +1,4 @@
-package si.nejcj.goalball.scoresheet.util;
+package si.nejcj.goalball.scoresheet.util.pdf;
 
 public class PdfFieldConstants {
   /**
