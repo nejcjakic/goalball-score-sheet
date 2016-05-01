@@ -1494,6 +1494,51 @@ public class TournamentController {
     fileChooser.showSaveDialog(m_tournamentPanel);
   }
 
+  public void createResultInputTable() {
+    List<Team> teams = m_dbConnection
+        .getParticipatingTeams(m_tournament.getId());
+
+    final String fileSuffix = "pdf";
+    final JFileChooser fileChooser = new JFileChooser(m_tournamentStatsSaveDir);
+    fileChooser.setAcceptAllFileFilterUsed(false);
+    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+    fileChooser
+        .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
+    StringBuilder defaultFileName = new StringBuilder();
+    defaultFileName.append("Results input");
+    fileChooser.setSelectedFile(new File(defaultFileName.toString()));
+    fileChooser.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        if (evt.getActionCommand().startsWith("Approve")) {
+          File destFile;
+          m_tournamentStatsSaveDir = fileChooser.getCurrentDirectory();
+          String fileName = fileChooser.getSelectedFile().toString();
+
+          if (fileName.endsWith("." + fileSuffix)) {
+            destFile = new File(fileName);
+          } else {
+            destFile = new File(fileName + "." + fileSuffix);
+          }
+
+          if (destFile.exists()) {
+            int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
+                "File allready exists!\n" + "Overwrite file?", "File exists",
+                JOptionPane.OK_CANCEL_OPTION);
+
+            if (selectedInd == JOptionPane.OK_OPTION) {
+              TournamentDataUtil.createResultInputTable(destFile, teams);
+            }
+          } else {
+            // if file is not found create and save it!
+            TournamentDataUtil.createResultInputTable(destFile, teams);
+          }
+        }
+      }
+    });
+
+    fileChooser.showSaveDialog(m_tournamentPanel);
+  }
+
   public void createTournamentResults() {
     List<TournamentGame> tournamentGames = m_dbConnection
         .getTournamentGames(m_tournament.getId());

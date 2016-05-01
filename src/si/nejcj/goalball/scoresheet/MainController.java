@@ -221,6 +221,8 @@ public class MainController {
         new CreateRefereeScheduleAction());
     JMenuItem teamDisplayNamesItem = new JMenuItem(
         new CreateTeamDisplayNamesAction());
+    JMenuItem resultInputTableItem = new JMenuItem(
+        new CreateResultsInputTable());
     JMenuItem tournamentResultsItem = new JMenuItem(
         new CreateTournamentResultsAction());
     JMenuItem tournamentStatsItem = new JMenuItem(
@@ -229,6 +231,7 @@ public class MainController {
     tournamentMenu.add(allScoreShhetsItem);
     tournamentMenu.add(refScheduleItem);
     tournamentMenu.add(teamDisplayNamesItem);
+    tournamentMenu.add(resultInputTableItem);
     tournamentMenu.add(tournamentResultsItem);
     tournamentMenu.add(tournamentStatsItem);
     menuBar.add(tournamentMenu);
@@ -459,6 +462,19 @@ public class MainController {
     @Override
     public void actionPerformed(ActionEvent e) {
       m_tournamentController.createTeamDisplayNames();
+    }
+  }
+
+  class CreateResultsInputTable extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
+    public CreateResultsInputTable() {
+      super("Generate results input table");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      m_tournamentController.createResultInputTable();
     }
   }
 

@@ -18,9 +18,9 @@ import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalExcepti
 
 public class PdfUtil {
 
-  static final Font titleRowFont = FontFactory.getFont(FontFactory.TIMES, 10,
+  static final Font TITLE_ROW_FONT = FontFactory.getFont(FontFactory.TIMES, 10,
       Font.BOLD, BaseColor.BLACK);
-  static final Font dataRowFont = FontFactory.getFont(FontFactory.TIMES, 10,
+  static final Font DATA_ROW_FONT = FontFactory.getFont(FontFactory.TIMES, 10,
       Font.NORMAL, BaseColor.BLACK);
 
   /**

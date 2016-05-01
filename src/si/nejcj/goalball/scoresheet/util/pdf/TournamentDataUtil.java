@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -40,7 +41,8 @@ public class TournamentDataUtil extends PdfUtil {
 
   public static void createTeamDisplayNames(File file, final List<Team> teams) {
     try {
-      Document document = new Document(PageSize.A4.rotate());
+      Rectangle pageSize = PageSize.A4.rotate();
+      Document document = new Document(pageSize);
       PdfWriter writer = PdfWriter.getInstance(document,
           new FileOutputStream(file));
       document.open();
@@ -55,17 +57,7 @@ public class TournamentDataUtil extends PdfUtil {
         cell.setPadding(1);
         table.addCell(cell);
 
-        table.setTotalWidth(PageSize.A4.rotate().getWidth());
-        table.setLockedWidth(true);
-        PdfContentByte canvas = writer.getDirectContent();
-        PdfTemplate template = canvas.createTemplate(table.getTotalWidth(),
-            table.getTotalHeight());
-        table.writeSelectedRows(0, -1, 0, table.getTotalHeight(), template);
-        Image img = Image.getInstance(template);
-        img.scaleToFit(PageSize.A4.rotate().getWidth(),
-            PageSize.A4.rotate().getHeight());
-        img.setAbsolutePosition(0,
-            (PageSize.A4.rotate().getHeight() - table.getTotalHeight()) / 2);
+        Image img = fitTableToPage(pageSize, writer.getDirectContent(), table);
         document.add(img);
         document.newPage();
       }
@@ -74,7 +66,66 @@ public class TournamentDataUtil extends PdfUtil {
     } catch (IOException | DocumentException e) {
       throw new InternalTechnicalException("Problem creating pdf file", e);
     }
+  }
 
+  // TODO: Add Column for points at the end
+  // TODO: This only works for single round robin
+  // If there are groups a different data source is required
+  public static void createResultInputTable(File file, List<Team> teams) {
+    try {
+      Rectangle pageSize = PageSize.A4.rotate();
+      Document document = new Document(pageSize);
+      PdfWriter writer = PdfWriter.getInstance(document,
+          new FileOutputStream(file));
+      document.open();
+
+      int numberOfTeams = teams.size();
+      PdfPTable table = new PdfPTable(numberOfTeams + 1);
+
+      PdfPCell darkCell = new PdfPCell();
+      darkCell.setBackgroundColor(BaseColor.BLACK);
+      PdfPCell emptyCell = new PdfPCell();
+
+      table.addCell(darkCell);
+
+      for (Team team : teams) {
+        /////////////////////
+        Phrase p = new Phrase(team.getTeamName().toUpperCase(), TITLE_ROW_FONT);
+        PdfPCell cell = new PdfPCell(p);
+        cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+        cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
+        // cell.setBorder(PdfPCell.NO_BORDER);
+        // cell.setPadding(1);
+        table.addCell(cell);
+        ////////////////////
+      }
+
+      for (int i = 0; i < numberOfTeams; i++) {
+        Team team = teams.get(i);
+        Phrase p = new Phrase(team.getTeamName().toUpperCase(), TITLE_ROW_FONT);
+        PdfPCell cell = new PdfPCell(p);
+        cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+        cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
+        // cell.setBorder(PdfPCell.NO_BORDER);
+        // cell.setPadding(1);
+        table.addCell(cell);
+        for (int j = 0; j < numberOfTeams; j++) {
+          if (i == j) {
+            table.addCell(darkCell);
+          } else {
+            table.addCell(emptyCell);
+          }
+        }
+      }
+
+      Image img = fitTableToPage(pageSize, writer.getDirectContent(), table);
+      document.add(img);
+      document.newPage();
+
+      document.close();
+    } catch (IOException | DocumentException e) {
+      throw new InternalTechnicalException("Problem creating pdf file", e);
+    }
   }
 
   public static void createTournamentResults(File file,
@@ -165,36 +216,36 @@ public class TournamentDataUtil extends PdfUtil {
           .setWidths(new float[] { 1f, 5f, 2f, 2f, 2f, 2f, 2f, 2f, 2f });
       tournamentResultsTable.setHorizontalAlignment(PdfPTable.ALIGN_LEFT);
 
-      tournamentResultsTable.addCell(new Phrase("Pos", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("Team name", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("Wins", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("Draws", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("Loses", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("GF", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("GA", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("Dif", titleRowFont));
-      tournamentResultsTable.addCell(new Phrase("Points", titleRowFont));
+      tournamentResultsTable.addCell(new Phrase("Pos", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("Team name", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("Wins", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("Draws", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("Loses", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("GF", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("GA", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("Dif", TITLE_ROW_FONT));
+      tournamentResultsTable.addCell(new Phrase("Points", TITLE_ROW_FONT));
 
       int i = 1;
       for (GameResult result : gameResults) {
         tournamentResultsTable
-            .addCell(new Phrase(String.valueOf(i++), dataRowFont));
+            .addCell(new Phrase(String.valueOf(i++), DATA_ROW_FONT));
         tournamentResultsTable
-            .addCell(new Phrase(result.getTeamName(), dataRowFont));
-        tournamentResultsTable
-            .addCell(new Phrase(String.valueOf(result.getWins()), dataRowFont));
+            .addCell(new Phrase(result.getTeamName(), DATA_ROW_FONT));
         tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getDraws()), dataRowFont));
+            new Phrase(String.valueOf(result.getWins()), DATA_ROW_FONT));
         tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getLosses()), dataRowFont));
+            new Phrase(String.valueOf(result.getDraws()), DATA_ROW_FONT));
         tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getGoalsScored()), dataRowFont));
+            new Phrase(String.valueOf(result.getLosses()), DATA_ROW_FONT));
         tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getGoalsConceded()), dataRowFont));
+            new Phrase(String.valueOf(result.getGoalsScored()), DATA_ROW_FONT));
         tournamentResultsTable.addCell(new Phrase(
-            String.valueOf(result.getGoalDifference()), dataRowFont));
+            String.valueOf(result.getGoalsConceded()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(
+            String.valueOf(result.getGoalDifference()), DATA_ROW_FONT));
         tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getPoints()), titleRowFont));
+            new Phrase(String.valueOf(result.getPoints()), TITLE_ROW_FONT));
       }
       document.add(tournamentResultsTable);
 
@@ -225,21 +276,22 @@ public class TournamentDataUtil extends PdfUtil {
     gameResultsTable.setWidthPercentage(30);
     gameResultsTable.setWidths(new float[] { 3f, 1f });
     gameResultsTable.setHorizontalAlignment(PdfPTable.ALIGN_LEFT);
-    gameResultsTable.addCell(new Phrase("Teams", titleRowFont));
-    gameResultsTable.addCell(new Phrase("Score", titleRowFont));
+    gameResultsTable.addCell(new Phrase("Teams", TITLE_ROW_FONT));
+    gameResultsTable.addCell(new Phrase("Score", TITLE_ROW_FONT));
 
     for (TournamentGame game : tournamentGames) {
       StringBuilder teams = new StringBuilder();
       teams.append(game.getTeamA().getSimpleName());
       teams.append(" : ");
       teams.append(game.getTeamB().getSimpleName());
-      gameResultsTable.addCell(new Phrase(teams.toString(), dataRowFont));
+      gameResultsTable.addCell(new Phrase(teams.toString(), DATA_ROW_FONT));
 
       StringBuilder gameResult = new StringBuilder();
       gameResult.append(game.getScoreTeamA());
       gameResult.append(" : ");
       gameResult.append(game.getScoreTeamB());
-      gameResultsTable.addCell(new Phrase(gameResult.toString(), dataRowFont));
+      gameResultsTable
+          .addCell(new Phrase(gameResult.toString(), DATA_ROW_FONT));
     }
     return gameResultsTable;
   }
@@ -251,9 +303,9 @@ public class TournamentDataUtil extends PdfUtil {
     topScorersTable.setWidthPercentage(30);
     topScorersTable.setWidths(new float[] { 5f, 4f, 2f });
     topScorersTable.setHorizontalAlignment(PdfPTable.ALIGN_LEFT);
-    topScorersTable.addCell(new Phrase("Player", titleRowFont));
-    topScorersTable.addCell(new Phrase("Team", titleRowFont));
-    topScorersTable.addCell(new Phrase("Goals", titleRowFont));
+    topScorersTable.addCell(new Phrase("Player", TITLE_ROW_FONT));
+    topScorersTable.addCell(new Phrase("Team", TITLE_ROW_FONT));
+    topScorersTable.addCell(new Phrase("Goals", TITLE_ROW_FONT));
 
     Set<Entry<TournamentPlayer, Integer>> entries = tournamentScorers
         .entrySet();
@@ -269,10 +321,10 @@ public class TournamentDataUtil extends PdfUtil {
         });
     for (Map.Entry<TournamentPlayer, Integer> entry : scorersList) {
       TournamentPlayer player = entry.getKey();
-      topScorersTable.addCell(new Phrase(player.getFullName(), dataRowFont));
-      topScorersTable.addCell(new Phrase(player.getTeamName(), dataRowFont));
+      topScorersTable.addCell(new Phrase(player.getFullName(), DATA_ROW_FONT));
+      topScorersTable.addCell(new Phrase(player.getTeamName(), DATA_ROW_FONT));
       topScorersTable
-          .addCell(new Phrase(entry.getValue().toString(), dataRowFont));
+          .addCell(new Phrase(entry.getValue().toString(), DATA_ROW_FONT));
     }
     return topScorersTable;
   }
@@ -323,6 +375,20 @@ public class TournamentDataUtil extends PdfUtil {
       }
     }
     return null;
+  }
+
+  private static Image fitTableToPage(Rectangle pageSize, PdfContentByte canvas,
+      PdfPTable table) throws BadElementException {
+    table.setTotalWidth(pageSize.getWidth());
+    table.setLockedWidth(true);
+    PdfTemplate template = canvas.createTemplate(table.getTotalWidth(),
+        table.getTotalHeight());
+    table.writeSelectedRows(0, -1, 0, table.getTotalHeight(), template);
+    Image img = Image.getInstance(template);
+    img.scaleToFit(pageSize.getWidth(), pageSize.getHeight());
+    img.setAbsolutePosition(0,
+        (pageSize.getHeight() - table.getTotalHeight()) / 2);
+    return img;
   }
 
   // TODO: Hack for MEGL
