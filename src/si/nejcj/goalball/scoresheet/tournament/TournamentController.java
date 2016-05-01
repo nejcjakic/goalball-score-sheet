@@ -51,6 +51,7 @@ import si.nejcj.goalball.scoresheet.db.entity.TournamentPlayer;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentStaff;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentTeam;
 import si.nejcj.goalball.scoresheet.db.entity.util.GameResult;
+import si.nejcj.goalball.scoresheet.db.entity.util.RefereeGame;
 import si.nejcj.goalball.scoresheet.db.entity.util.TournamentStats;
 import si.nejcj.goalball.scoresheet.exception.business.InternalIntegrityConstraintException;
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
@@ -75,8 +76,8 @@ import si.nejcj.goalball.scoresheet.util.ErrorHandler;
 import si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants;
 import si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConverter;
 import si.nejcj.goalball.scoresheet.util.pdf.PdfUtil;
-import si.nejcj.goalball.scoresheet.util.pdf.TournamentRefereesUtil;
 import si.nejcj.goalball.scoresheet.util.pdf.TournamentDataUtil;
+import si.nejcj.goalball.scoresheet.util.pdf.TournamentRefereesUtil;
 
 public class TournamentController {
   private DatabaseConnection m_dbConnection;
@@ -1272,6 +1273,53 @@ public class TournamentController {
             // if file is not found create and save it!
             TournamentRefereesUtil.createTournamentStats(destFile,
                 tournamentStats);
+          }
+        }
+      }
+    });
+
+    fileChooser.showSaveDialog(m_tournamentPanel);
+  }
+
+  public void createRefereeGamesSheets() {
+    Map<TournamentOfficial, List<RefereeGame>> refereeGames = m_dbConnection
+        .getRefereeGames(m_tournament.getId());
+
+    final String fileSuffix = "pdf";
+    final JFileChooser fileChooser = new JFileChooser(m_tournamentStatsSaveDir);
+    fileChooser.setAcceptAllFileFilterUsed(false);
+    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+    fileChooser
+        .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
+    StringBuilder defaultFileName = new StringBuilder();
+    defaultFileName.append("Referee games");
+    fileChooser.setSelectedFile(new File(defaultFileName.toString()));
+    fileChooser.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        if (evt.getActionCommand().startsWith("Approve")) {
+          File destFile;
+          m_tournamentStatsSaveDir = fileChooser.getCurrentDirectory();
+          String fileName = fileChooser.getSelectedFile().toString();
+
+          if (fileName.endsWith("." + fileSuffix)) {
+            destFile = new File(fileName);
+          } else {
+            destFile = new File(fileName + "." + fileSuffix);
+          }
+
+          if (destFile.exists()) {
+            int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
+                "File allready exists!\n" + "Overwrite file?", "File exists",
+                JOptionPane.OK_CANCEL_OPTION);
+
+            if (selectedInd == JOptionPane.OK_OPTION) {
+              TournamentRefereesUtil.createRefereeGamesSheets(destFile,
+                  refereeGames);
+            }
+          } else {
+            // if file is not found create and save it!
+            TournamentRefereesUtil.createRefereeGamesSheets(destFile,
+                refereeGames);
           }
         }
       }

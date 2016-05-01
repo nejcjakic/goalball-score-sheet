@@ -227,6 +227,8 @@ public class MainController {
         new CreateTournamentResultsAction());
     JMenuItem tournamentStatsItem = new JMenuItem(
         new CreateTournamentStatsAction());
+    JMenuItem refereeSheetsItem = new JMenuItem(
+        new CreateRefereeGamesSheetsAction());
     tournamentMenu.add(scoreSheetItem);
     tournamentMenu.add(allScoreShhetsItem);
     tournamentMenu.add(refScheduleItem);
@@ -234,6 +236,7 @@ public class MainController {
     tournamentMenu.add(resultInputTableItem);
     tournamentMenu.add(tournamentResultsItem);
     tournamentMenu.add(tournamentStatsItem);
+    tournamentMenu.add(refereeSheetsItem);
     menuBar.add(tournamentMenu);
 
     // Help menu
@@ -503,6 +506,21 @@ public class MainController {
     @Override
     public void actionPerformed(ActionEvent e) {
       m_tournamentController.createTournamentStats();
+    }
+  }
+
+  class CreateRefereeGamesSheetsAction extends AbstractAction {
+
+    private static final long serialVersionUID = 1L;
+
+    public CreateRefereeGamesSheetsAction() {
+      super("Create referee games sheets");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      m_tournamentController.createRefereeGamesSheets();
+      ;
     }
   }
 

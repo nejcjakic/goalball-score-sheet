@@ -5,12 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -20,10 +18,11 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import si.nejcj.goalball.scoresheet.db.entity.TournamentGame;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentOfficial;
+import si.nejcj.goalball.scoresheet.db.entity.util.RefereeGame;
 import si.nejcj.goalball.scoresheet.db.entity.util.TournamentStats;
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
 
-public class TournamentRefereesUtil {
+public class TournamentRefereesUtil extends PdfUtil {
 
   public static void createRefereesSchedule(File file,
       final List<TournamentGame> tournamentGames, String venue) {
@@ -42,60 +41,57 @@ public class TournamentRefereesUtil {
       PdfPTable table = new PdfPTable(14);
       table.setWidthPercentage(100);
 
-      Font titleRowFont = FontFactory.getFont(FontFactory.TIMES, 10, Font.BOLD,
-          BaseColor.BLACK);
-      Font dataRowFont = FontFactory.getFont(FontFactory.TIMES, 10, Font.NORMAL,
-          BaseColor.BLACK);
-
-      table.addCell(new Phrase("Time", titleRowFont));
-      table.addCell(new Phrase("Team 1", titleRowFont));
-      table.addCell(new Phrase("Team 2", titleRowFont));
-      table.addCell(new Phrase("Referee TS", titleRowFont));
-      table.addCell(new Phrase("Referee FS", titleRowFont));
-      table.addCell(new Phrase("Ten seconds", titleRowFont));
-      table.addCell(new Phrase("Ten seconds", titleRowFont));
-      table.addCell(new Phrase("Scorer", titleRowFont));
-      table.addCell(new Phrase("Timer", titleRowFont));
-      table.addCell(new Phrase("Backup timer", titleRowFont));
-      table.addCell(new Phrase("Goal judge", titleRowFont));
-      table.addCell(new Phrase("Goal judge", titleRowFont));
-      table.addCell(new Phrase("Goal judge", titleRowFont));
-      table.addCell(new Phrase("Goal judge", titleRowFont));
+      table.addCell(new Phrase("Time", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Team 1", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Team 2", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Referee TS", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Referee FS", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Ten seconds", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Ten seconds", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Scorer", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Timer", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Backup timer", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Goal judge", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Goal judge", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Goal judge", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Goal judge", TITLE_ROW_FONT));
       for (TournamentGame tournamentGame : tournamentGames) {
-        table.addCell(new Phrase(tournamentGame.getGameTime(), dataRowFont));
+        table.addCell(new Phrase(tournamentGame.getGameTime(), DATA_ROW_FONT));
         table.addCell(new Phrase(tournamentGame.getTeamA().getDisplayName(),
-            dataRowFont));
+            DATA_ROW_FONT));
         table.addCell(new Phrase(tournamentGame.getTeamB().getDisplayName(),
-            dataRowFont));
-        table.addCell(new Phrase(
-            getNullSafeDisplayName(tournamentGame.getReferee1()), dataRowFont));
-        table.addCell(new Phrase(
-            getNullSafeDisplayName(tournamentGame.getReferee2()), dataRowFont));
+            DATA_ROW_FONT));
+        table.addCell(
+            new Phrase(getNullSafeDisplayName(tournamentGame.getReferee1()),
+                DATA_ROW_FONT));
+        table.addCell(
+            new Phrase(getNullSafeDisplayName(tournamentGame.getReferee2()),
+                DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getTenSeconds1()),
-                dataRowFont));
+                DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getTenSeconds2()),
-                dataRowFont));
+                DATA_ROW_FONT));
         table.addCell(new Phrase(
-            getNullSafeDisplayName(tournamentGame.getScorer()), dataRowFont));
+            getNullSafeDisplayName(tournamentGame.getScorer()), DATA_ROW_FONT));
         table.addCell(new Phrase(
-            getNullSafeDisplayName(tournamentGame.getTimer()), dataRowFont));
+            getNullSafeDisplayName(tournamentGame.getTimer()), DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getBackupTimer()),
-                dataRowFont));
+                DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getGoalJudge1()),
-                dataRowFont));
+                DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getGoalJudge2()),
-                dataRowFont));
+                DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getGoalJudge3()),
-                dataRowFont));
+                DATA_ROW_FONT));
         table.addCell(
             new Phrase(getNullSafeDisplayName(tournamentGame.getGoalJudge4()),
-                dataRowFont));
+                DATA_ROW_FONT));
       }
       document.add(table);
 
@@ -107,6 +103,41 @@ public class TournamentRefereesUtil {
     }
   }
 
+  public static void createRefereeGamesSheets(File file,
+      final Map<TournamentOfficial, List<RefereeGame>> refereeGames) {
+    try {
+      Rectangle a4Size = PageSize.A4;
+      Document document = new Document(
+          new Rectangle(a4Size.getHeight(), a4Size.getWidth()), 15, 15, 20, 20);
+      PdfWriter.getInstance(document, new FileOutputStream(file));
+      document.open();
+
+      for (TournamentOfficial official : refereeGames.keySet()) {
+        document.add(new Paragraph(official.getFullName()));
+        document.add(new Paragraph(" "));
+
+        List<RefereeGame> games = refereeGames.get(official);
+        PdfPTable table = new PdfPTable(3);
+        table.setWidthPercentage(50);
+
+        table.addCell("Game no");
+        table.addCell("Time");
+        table.addCell("Position");
+
+        for (RefereeGame game : games) {
+          table.addCell(game.getGameNo().toString());
+          table.addCell(game.getGameTime());
+          table.addCell(game.getPosition());
+        }
+        document.add(table);
+        document.newPage();
+      }
+      document.close();
+    } catch (IOException | DocumentException e) {
+      throw new InternalTechnicalException("Problem creating pdf file", e);
+    }
+  }
+
   public static void createTournamentStats(File file,
       final List<TournamentStats> tournamentStats) {
     try {
@@ -114,7 +145,7 @@ public class TournamentRefereesUtil {
 
       Rectangle a4Size = PageSize.A4;
       Document document = new Document(
-          new Rectangle(a4Size.getHeight(), a4Size.getWidth()), 5, 5, 20, 20);
+          new Rectangle(a4Size.getHeight(), a4Size.getWidth()), 15, 15, 20, 20);
       PdfWriter.getInstance(document, new FileOutputStream(file));
       document.open();
 
@@ -124,22 +155,18 @@ public class TournamentRefereesUtil {
       PdfPTable table = new PdfPTable(4);
       table.setWidthPercentage(100);
 
-      Font titleRowFont = FontFactory.getFont(FontFactory.TIMES, 10, Font.BOLD,
-          BaseColor.BLACK);
-      Font dataRowFont = FontFactory.getFont(FontFactory.TIMES, 10, Font.NORMAL,
-          BaseColor.BLACK);
-
-      table.addCell(new Phrase("Official's name", titleRowFont));
-      table.addCell(new Phrase("Games as referee", titleRowFont));
-      table.addCell(new Phrase("Games as table official", titleRowFont));
-      table.addCell(new Phrase("Games as goal judge", titleRowFont));
+      table.addCell(new Phrase("Official's name", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Games as referee", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Games as table official", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Games as goal judge", TITLE_ROW_FONT));
 
       for (TournamentStats stats : tournamentStats) {
         table.addCell(new Phrase(stats.getTournamentOfficial().getFullName(),
-            dataRowFont));
-        table.addCell(new Phrase(stats.getGamesAsReferee(), dataRowFont));
-        table.addCell(new Phrase(stats.getGamesAsTableOfficial(), dataRowFont));
-        table.addCell(new Phrase(stats.getGamesAsGoalJudge(), dataRowFont));
+            DATA_ROW_FONT));
+        table.addCell(new Phrase(stats.getGamesAsReferee(), DATA_ROW_FONT));
+        table.addCell(
+            new Phrase(stats.getGamesAsTableOfficial(), DATA_ROW_FONT));
+        table.addCell(new Phrase(stats.getGamesAsGoalJudge(), DATA_ROW_FONT));
       }
       document.add(table);
 

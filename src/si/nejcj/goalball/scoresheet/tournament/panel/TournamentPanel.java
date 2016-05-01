@@ -46,7 +46,7 @@ public class TournamentPanel extends JPanel {
     JLabel tournamentNameLBL = new JLabel("Tournament name");
     tournamentNameTF = new JTextField();
     tournamentNameTF.setEditable(false);
-    tournamentNameTF.setColumns(10);
+    tournamentNameTF.setColumns(20);
     tournamentNameTF.addCaretListener((CaretListener) componenentListeners
         .get(TournamentListeners.TOURNAMENT_NAME));
     JLabel locationLBL = new JLabel("Location");
@@ -94,7 +94,7 @@ public class TournamentPanel extends JPanel {
                         groupLayout.createSequentialGroup()
                             .addComponent(tournamentNameLBL)
                             .addPreferredGap(ComponentPlacement.RELATED)
-                            .addComponent(tournamentNameTF, 239, 239, 239))
+                            .addComponent(tournamentNameTF, 300, 300, 300))
                     .addGroup(
                         groupLayout
                             .createSequentialGroup()
