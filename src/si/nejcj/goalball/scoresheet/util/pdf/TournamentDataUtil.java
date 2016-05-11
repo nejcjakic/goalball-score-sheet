@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
@@ -42,7 +43,7 @@ public class TournamentDataUtil extends PdfUtil {
   public static void createGamesSchedule(File file,
       final List<TournamentGame> tournamentGames, String venue) {
     try {
-      Collections.sort(tournamentGames);
+      Map<String, List<TournamentGame>> gamesByGroup = filterGamesByGroup(tournamentGames);
 
       Rectangle a4Size = PageSize.A4;
       Document document = new Document(new Rectangle(a4Size.getHeight(),
@@ -53,21 +54,30 @@ public class TournamentDataUtil extends PdfUtil {
       document.add(new Paragraph("Games schedule " + venue));
       document.add(new Paragraph(" "));
 
-      PdfPTable table = new PdfPTable(3);
-      table.setWidthPercentage(60);
-      table.setWidths(new float[] { 1f, 3f, 3f });
+      for (String group : gamesByGroup.keySet()) {
+        document.add(new Paragraph(group));
+        document.add(new Paragraph(" "));
 
-      table.addCell(new Phrase("Time", TITLE_ROW_FONT));
-      table.addCell(new Phrase("Team 1", TITLE_ROW_FONT));
-      table.addCell(new Phrase("Team 2", TITLE_ROW_FONT));
-      for (TournamentGame tournamentGame : tournamentGames) {
-        table.addCell(new Phrase(tournamentGame.getGameTime(), DATA_ROW_FONT));
-        table.addCell(new Phrase(tournamentGame.getTeamA().getDisplayName(),
-            DATA_ROW_FONT));
-        table.addCell(new Phrase(tournamentGame.getTeamB().getDisplayName(),
-            DATA_ROW_FONT));
+        List<TournamentGame> groupGames = gamesByGroup.get(group);
+        Collections.sort(groupGames);
+
+        PdfPTable table = new PdfPTable(3);
+        table.setWidthPercentage(60);
+        table.setWidths(new float[] { 1f, 3f, 3f });
+
+        table.addCell(new Phrase("Time", TITLE_ROW_FONT));
+        table.addCell(new Phrase("Team 1", TITLE_ROW_FONT));
+        table.addCell(new Phrase("Team 2", TITLE_ROW_FONT));
+        for (TournamentGame tournamentGame : groupGames) {
+          table
+              .addCell(new Phrase(tournamentGame.getGameTime(), DATA_ROW_FONT));
+          table.addCell(new Phrase(tournamentGame.getTeamA().getDisplayName(),
+              DATA_ROW_FONT));
+          table.addCell(new Phrase(tournamentGame.getTeamB().getDisplayName(),
+              DATA_ROW_FONT));
+        }
+        document.add(table);
       }
-      document.add(table);
 
       document.close();
     } catch (IOException e) {
@@ -75,6 +85,12 @@ public class TournamentDataUtil extends PdfUtil {
     } catch (DocumentException e) {
       throw new InternalTechnicalException("Problem creating pdf file", e);
     }
+  }
+
+  private static Map<String, List<TournamentGame>> filterGamesByGroup(
+      List<TournamentGame> tournamentGames) {
+    return tournamentGames.stream().collect(
+        Collectors.groupingBy(TournamentGame::getPool));
   }
 
   public static void createTeamDisplayNames(File file, final List<Team> teams) {
