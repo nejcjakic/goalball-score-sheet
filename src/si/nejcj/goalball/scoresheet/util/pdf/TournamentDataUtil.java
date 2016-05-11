@@ -36,15 +36,53 @@ import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalExcepti
 
 public class TournamentDataUtil extends PdfUtil {
 
-  static final Font TEAM_DISPLAY_NAME_FONT = FontFactory
-      .getFont(FontFactory.TIMES, 120, Font.BOLD, BaseColor.BLACK);
+  static final Font TEAM_DISPLAY_NAME_FONT = FontFactory.getFont(
+      FontFactory.TIMES, 120, Font.BOLD, BaseColor.BLACK);
+
+  public static void createGamesSchedule(File file,
+      final List<TournamentGame> tournamentGames, String venue) {
+    try {
+      Collections.sort(tournamentGames);
+
+      Rectangle a4Size = PageSize.A4;
+      Document document = new Document(new Rectangle(a4Size.getHeight(),
+          a4Size.getWidth()), 5, 5, 20, 20);
+      PdfWriter.getInstance(document, new FileOutputStream(file));
+      document.open();
+
+      document.add(new Paragraph("Games schedule " + venue));
+      document.add(new Paragraph(" "));
+
+      PdfPTable table = new PdfPTable(3);
+      table.setWidthPercentage(60);
+      table.setWidths(new float[] { 1f, 3f, 3f });
+
+      table.addCell(new Phrase("Time", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Team 1", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Team 2", TITLE_ROW_FONT));
+      for (TournamentGame tournamentGame : tournamentGames) {
+        table.addCell(new Phrase(tournamentGame.getGameTime(), DATA_ROW_FONT));
+        table.addCell(new Phrase(tournamentGame.getTeamA().getDisplayName(),
+            DATA_ROW_FONT));
+        table.addCell(new Phrase(tournamentGame.getTeamB().getDisplayName(),
+            DATA_ROW_FONT));
+      }
+      document.add(table);
+
+      document.close();
+    } catch (IOException e) {
+      throw new InternalTechnicalException("Problem creating pdf file", e);
+    } catch (DocumentException e) {
+      throw new InternalTechnicalException("Problem creating pdf file", e);
+    }
+  }
 
   public static void createTeamDisplayNames(File file, final List<Team> teams) {
     try {
       Rectangle pageSize = PageSize.A4.rotate();
       Document document = new Document(pageSize);
-      PdfWriter writer = PdfWriter.getInstance(document,
-          new FileOutputStream(file));
+      PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(
+          file));
       document.open();
       for (Team team : teams) {
         PdfPTable table = new PdfPTable(1);
@@ -75,8 +113,8 @@ public class TournamentDataUtil extends PdfUtil {
     try {
       Rectangle pageSize = PageSize.A4.rotate();
       Document document = new Document(pageSize);
-      PdfWriter writer = PdfWriter.getInstance(document,
-          new FileOutputStream(file));
+      PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(
+          file));
       document.open();
 
       int numberOfTeams = teams.size();
@@ -89,7 +127,7 @@ public class TournamentDataUtil extends PdfUtil {
       table.addCell(darkCell);
 
       for (Team team : teams) {
-        /////////////////////
+        // ///////////////////
         Phrase p = new Phrase(team.getTeamName().toUpperCase(), TITLE_ROW_FONT);
         PdfPCell cell = new PdfPCell(p);
         cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
@@ -97,7 +135,7 @@ public class TournamentDataUtil extends PdfUtil {
         // cell.setBorder(PdfPCell.NO_BORDER);
         // cell.setPadding(1);
         table.addCell(cell);
-        ////////////////////
+        // //////////////////
       }
 
       for (int i = 0; i < numberOfTeams; i++) {
@@ -134,8 +172,8 @@ public class TournamentDataUtil extends PdfUtil {
       final Map<TournamentPlayer, Integer> tournamentScorers) {
     try {
       Rectangle a4Size = PageSize.A4;
-      Document document = new Document(
-          new Rectangle(a4Size.getWidth(), a4Size.getHeight()), 5, 5, 20, 20);
+      Document document = new Document(new Rectangle(a4Size.getWidth(),
+          a4Size.getHeight()), 5, 5, 20, 20);
       PdfWriter.getInstance(document, new FileOutputStream(file));
       document.open();
 
@@ -212,8 +250,8 @@ public class TournamentDataUtil extends PdfUtil {
 
       PdfPTable tournamentResultsTable = new PdfPTable(9);
       tournamentResultsTable.setWidthPercentage(85);
-      tournamentResultsTable
-          .setWidths(new float[] { 1f, 5f, 2f, 2f, 2f, 2f, 2f, 2f, 2f });
+      tournamentResultsTable.setWidths(new float[] { 1f, 5f, 2f, 2f, 2f, 2f,
+          2f, 2f, 2f });
       tournamentResultsTable.setHorizontalAlignment(PdfPTable.ALIGN_LEFT);
 
       tournamentResultsTable.addCell(new Phrase("Pos", TITLE_ROW_FONT));
@@ -228,24 +266,24 @@ public class TournamentDataUtil extends PdfUtil {
 
       int i = 1;
       for (GameResult result : gameResults) {
-        tournamentResultsTable
-            .addCell(new Phrase(String.valueOf(i++), DATA_ROW_FONT));
-        tournamentResultsTable
-            .addCell(new Phrase(result.getTeamName(), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getWins()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getDraws()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getLosses()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getGoalsScored()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(new Phrase(
-            String.valueOf(result.getGoalsConceded()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(new Phrase(
-            String.valueOf(result.getGoalDifference()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getPoints()), TITLE_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(i++),
+            DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(result.getTeamName(),
+            DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getWins()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getDraws()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getLosses()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getGoalsScored()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getGoalsConceded()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getGoalDifference()), DATA_ROW_FONT));
+        tournamentResultsTable.addCell(new Phrase(String.valueOf(result
+            .getPoints()), TITLE_ROW_FONT));
       }
       document.add(tournamentResultsTable);
 
@@ -323,8 +361,8 @@ public class TournamentDataUtil extends PdfUtil {
       TournamentPlayer player = entry.getKey();
       topScorersTable.addCell(new Phrase(player.getFullName(), DATA_ROW_FONT));
       topScorersTable.addCell(new Phrase(player.getTeamName(), DATA_ROW_FONT));
-      topScorersTable
-          .addCell(new Phrase(entry.getValue().toString(), DATA_ROW_FONT));
+      topScorersTable.addCell(new Phrase(entry.getValue().toString(),
+          DATA_ROW_FONT));
     }
     return topScorersTable;
   }
@@ -377,8 +415,8 @@ public class TournamentDataUtil extends PdfUtil {
     return null;
   }
 
-  private static Image fitTableToPage(Rectangle pageSize, PdfContentByte canvas,
-      PdfPTable table) throws BadElementException {
+  private static Image fitTableToPage(Rectangle pageSize,
+      PdfContentByte canvas, PdfPTable table) throws BadElementException {
     table.setTotalWidth(pageSize.getWidth());
     table.setLockedWidth(true);
     PdfTemplate template = canvas.createTemplate(table.getTotalWidth(),
@@ -392,7 +430,8 @@ public class TournamentDataUtil extends PdfUtil {
   }
 
   // TODO: Hack for MEGL
-  // private static PdfPTable createFinalResultsTable() throws DocumentException
+  // private static PdfPTable createFinalResultsTable() throws
+  // DocumentException
   // {
   // PdfPTable gameResultsTable = new PdfPTable(2);
   // gameResultsTable.setWidthPercentage(30);
