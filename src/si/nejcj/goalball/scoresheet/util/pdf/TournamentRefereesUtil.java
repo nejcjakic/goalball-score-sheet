@@ -152,13 +152,14 @@ public class TournamentRefereesUtil extends PdfUtil {
       document.add(new Paragraph("Tournament Stats"));
       document.add(new Paragraph(" "));
 
-      PdfPTable table = new PdfPTable(4);
+      PdfPTable table = new PdfPTable(5);
       table.setWidthPercentage(100);
 
       table.addCell(new Phrase("Official's name", TITLE_ROW_FONT));
       table.addCell(new Phrase("Games as referee", TITLE_ROW_FONT));
       table.addCell(new Phrase("Games as table official", TITLE_ROW_FONT));
       table.addCell(new Phrase("Games as goal judge", TITLE_ROW_FONT));
+      table.addCell(new Phrase("Total games", TITLE_ROW_FONT));
 
       for (TournamentStats stats : tournamentStats) {
         table.addCell(new Phrase(stats.getTournamentOfficial().getFullName(),
@@ -167,6 +168,7 @@ public class TournamentRefereesUtil extends PdfUtil {
         table.addCell(
             new Phrase(stats.getGamesAsTableOfficial(), DATA_ROW_FONT));
         table.addCell(new Phrase(stats.getGamesAsGoalJudge(), DATA_ROW_FONT));
+        table.addCell(new Phrase(stats.getTotalGames(), DATA_ROW_FONT));
       }
       document.add(table);
 

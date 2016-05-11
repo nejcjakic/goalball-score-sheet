@@ -32,6 +32,11 @@ public class TournamentStats implements Comparable<TournamentStats> {
     return String.valueOf(gamesAsGoalJudge);
   }
 
+  public String getTotalGames() {
+    return String
+        .valueOf(gamesAsReferee + gamesAsTableOfficial + gamesAsGoalJudge);
+  }
+
   public void increaseGamesAsReferee() {
     gamesAsReferee++;
   }
