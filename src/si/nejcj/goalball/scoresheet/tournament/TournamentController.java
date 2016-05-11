@@ -1539,7 +1539,7 @@ public class TournamentController {
   }
 
   public void createResultInputTable() {
-    List<Team> teams = m_dbConnection.getParticipatingTeams(m_tournament
+    List<TournamentGame> games = m_dbConnection.getTournamentGames(m_tournament
         .getId());
 
     final String fileSuffix = "pdf";
@@ -1570,11 +1570,11 @@ public class TournamentController {
                 JOptionPane.OK_CANCEL_OPTION);
 
             if (selectedInd == JOptionPane.OK_OPTION) {
-              TournamentDataUtil.createResultInputTable(destFile, teams);
+              TournamentDataUtil.createResultInputTable(destFile, games);
             }
           } else {
             // if file is not found create and save it!
-            TournamentDataUtil.createResultInputTable(destFile, teams);
+            TournamentDataUtil.createResultInputTable(destFile, games);
           }
         }
       }

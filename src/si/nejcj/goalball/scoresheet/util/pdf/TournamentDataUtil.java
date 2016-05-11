@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -87,12 +89,6 @@ public class TournamentDataUtil extends PdfUtil {
     }
   }
 
-  private static Map<String, List<TournamentGame>> filterGamesByGroup(
-      List<TournamentGame> tournamentGames) {
-    return tournamentGames.stream().collect(
-        Collectors.groupingBy(TournamentGame::getPool));
-  }
-
   public static void createTeamDisplayNames(File file, final List<Team> teams) {
     try {
       Rectangle pageSize = PageSize.A4.rotate();
@@ -125,57 +121,61 @@ public class TournamentDataUtil extends PdfUtil {
   // TODO: Add Column for points at the end
   // TODO: This only works for single round robin
   // If there are groups a different data source is required
-  public static void createResultInputTable(File file, List<Team> teams) {
+  public static void createResultInputTable(File file,
+      List<TournamentGame> tournamentGames) {
     try {
+      Map<String, Set<String>> groups = filterGroups(tournamentGames);
+
       Rectangle pageSize = PageSize.A4.rotate();
       Document document = new Document(pageSize);
       PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(
           file));
       document.open();
 
-      int numberOfTeams = teams.size();
-      PdfPTable table = new PdfPTable(numberOfTeams + 1);
+      for (String group : groups.keySet()) {
+        document.add(new Paragraph(group.toUpperCase()));
+        document.add(new Paragraph(" "));
 
-      PdfPCell darkCell = new PdfPCell();
-      darkCell.setBackgroundColor(BaseColor.BLACK);
-      PdfPCell emptyCell = new PdfPCell();
+        Set<String> teams = groups.get(group);
 
-      table.addCell(darkCell);
+        int numberOfTeams = teams.size();
+        PdfPTable table = new PdfPTable(numberOfTeams + 2);
 
-      for (Team team : teams) {
-        // ///////////////////
-        Phrase p = new Phrase(team.getTeamName().toUpperCase(), TITLE_ROW_FONT);
-        PdfPCell cell = new PdfPCell(p);
-        cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
-        cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
-        // cell.setBorder(PdfPCell.NO_BORDER);
-        // cell.setPadding(1);
-        table.addCell(cell);
-        // //////////////////
-      }
+        PdfPCell darkCell = new PdfPCell();
+        darkCell.setBackgroundColor(BaseColor.BLACK);
+        PdfPCell emptyCell = new PdfPCell();
 
-      for (int i = 0; i < numberOfTeams; i++) {
-        Team team = teams.get(i);
-        Phrase p = new Phrase(team.getTeamName().toUpperCase(), TITLE_ROW_FONT);
-        PdfPCell cell = new PdfPCell(p);
-        cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
-        cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
-        // cell.setBorder(PdfPCell.NO_BORDER);
-        // cell.setPadding(1);
-        table.addCell(cell);
-        for (int j = 0; j < numberOfTeams; j++) {
-          if (i == j) {
-            table.addCell(darkCell);
-          } else {
-            table.addCell(emptyCell);
+        table.addCell(darkCell);
+
+        for (String team : teams) {
+          Phrase p = new Phrase(team, TITLE_ROW_FONT);
+          PdfPCell cell = new PdfPCell(p);
+          cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+          cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
+          table.addCell(cell);
+        }
+        table.addCell(new Phrase("POINTS", TITLE_ROW_FONT));
+
+        for (int i = 0; i < numberOfTeams; i++) {
+          String team = (String) teams.toArray()[i];
+          Phrase p = new Phrase(team, TITLE_ROW_FONT);
+          PdfPCell cell = new PdfPCell(p);
+          cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+          cell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
+          table.addCell(cell);
+          for (int j = 0; j < numberOfTeams + 1; j++) {
+            if (i == j) {
+              table.addCell(darkCell);
+            } else {
+              table.addCell(emptyCell);
+            }
           }
         }
+
+        Image img = fitTableToPage(pageSize, writer.getDirectContent(), table);
+        document.add(img);
+        document.newPage();
       }
-
-      Image img = fitTableToPage(pageSize, writer.getDirectContent(), table);
-      document.add(img);
-      document.newPage();
-
       document.close();
     } catch (IOException | DocumentException e) {
       throw new InternalTechnicalException("Problem creating pdf file", e);
@@ -443,6 +443,32 @@ public class TournamentDataUtil extends PdfUtil {
     img.setAbsolutePosition(0,
         (pageSize.getHeight() - table.getTotalHeight()) / 2);
     return img;
+  }
+
+  private static Map<String, List<TournamentGame>> filterGamesByGroup(
+      List<TournamentGame> tournamentGames) {
+    return tournamentGames.stream().collect(
+        Collectors.groupingBy(TournamentGame::getPool));
+  }
+
+  private static Map<String, Set<String>> filterGroups(
+      List<TournamentGame> tournamentGames) {
+    Map<String, List<TournamentGame>> gamesByGroup = filterGamesByGroup(tournamentGames);
+
+    Map<String, Set<String>> tournamentGroups = new HashMap<String, Set<String>>();
+
+    for (String group : gamesByGroup.keySet()) {
+      tournamentGroups.putIfAbsent(group, new HashSet<String>());
+      List<TournamentGame> games = gamesByGroup.get(group);
+      for (TournamentGame game : games) {
+        tournamentGroups.get(group).add(
+            game.getTeamA().getTeamName().toUpperCase());
+        tournamentGroups.get(group).add(
+            game.getTeamB().getTeamName().toUpperCase());
+      }
+    }
+
+    return tournamentGroups;
   }
 
   // TODO: Hack for MEGL
