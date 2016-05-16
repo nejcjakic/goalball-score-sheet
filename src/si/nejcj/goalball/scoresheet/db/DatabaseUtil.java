@@ -47,7 +47,7 @@ public class DatabaseUtil {
     countries.add("Comoros");
     countries.add("Congo");
     countries.add("Costa Rica");
-    countries.add("Côte d'Ivoire");
+    countries.add("Cote d'Ivoire");
     countries.add("Croatia");
     countries.add("Cuba");
     countries.add("Cyprus");

@@ -17,7 +17,7 @@ import javax.swing.event.HyperlinkListener;
  * A panel for displaying html content, wrapping it in a ScrollPane, to make it
  * easier to read.
  * 
- * @author Nejc Jakiè
+ * @author Nejc Jakic
  * 
  */
 @SuppressWarnings("serial")

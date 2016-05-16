@@ -80,8 +80,8 @@ public class MainController {
       m_classLoader = this.getClass().getClassLoader();
 
       m_mainFrame = new MainFrame();
-      m_mainFrame.setIconImage(new ImageIcon(m_classLoader
-          .getResource("images/64x64/Scoresheet.png")).getImage());
+      m_mainFrame.setIconImage(new ImageIcon(
+          m_classLoader.getResource("images/64x64/Scoresheet.png")).getImage());
 
       initDatabase();
       initData();
@@ -105,10 +105,9 @@ public class MainController {
       m_mainFrame.setVisible(true);
     } catch (Throwable t) {
       // Catch all exception handling to not let any errors get to user
-      ErrorHandler
-          .sysErr(
-              "Unexpected error was encountered in application. GoalballScoreSheet will shut down.",
-              t.getMessage(), t);
+      ErrorHandler.sysErr(
+          "Unexpected error was encountered in application. GoalballScoreSheet will shut down.",
+          t.getMessage(), t);
       saveOnClose();
       System.exit(1);
     }
@@ -161,8 +160,9 @@ public class MainController {
         JPanel contentPanel = new JPanel();
         contentPanel.add(scrollPane);
 
-        JOptionPane.showMessageDialog(m_mainFrame, new Object[] { contentPanel,
-            showNextTime, new JSeparator(JSeparator.HORIZONTAL) },
+        JOptionPane.showMessageDialog(m_mainFrame,
+            new Object[] { contentPanel, showNextTime,
+                new JSeparator(JSeparator.HORIZONTAL) },
             "GoalballScoreSheet version " + VERSION,
             JOptionPane.INFORMATION_MESSAGE);
         if (!showNextTime.isSelected()) {
@@ -215,12 +215,15 @@ public class MainController {
     // Tournament menu
     JMenu tournamentMenu = new JMenu("Tournament");
     JMenuItem scoreSheetItem = new JMenuItem(new CreateScoreSheetAction());
-    JMenuItem allScoreShhetsItem = new JMenuItem(
+    JMenuItem allScoreSheetsItem = new JMenuItem(
         new CreateAllScoreSheetsAction());
     JMenuItem teamScheduleItem = new JMenuItem(new CreateTeamScheduleAction());
-    JMenuItem refScheduleItem = new JMenuItem(new CreateRefereeScheduleAction());
+    JMenuItem refScheduleItem = new JMenuItem(
+        new CreateRefereeScheduleAction());
     JMenuItem teamDisplayNamesItem = new JMenuItem(
         new CreateTeamDisplayNamesAction());
+    JMenuItem teamLineUpSheetsItem = new JMenuItem(
+        new CreateLineUpSheetsAction());
     JMenuItem resultInputTableItem = new JMenuItem(
         new CreateResultsInputTable());
     JMenuItem tournamentResultsItem = new JMenuItem(
@@ -230,9 +233,10 @@ public class MainController {
     JMenuItem refereeSheetsItem = new JMenuItem(
         new CreateRefereeGamesSheetsAction());
     tournamentMenu.add(scoreSheetItem);
-    tournamentMenu.add(allScoreShhetsItem);
+    tournamentMenu.add(allScoreSheetsItem);
     tournamentMenu.add(teamScheduleItem);
     tournamentMenu.add(refScheduleItem);
+    tournamentMenu.add(teamLineUpSheetsItem);
     tournamentMenu.add(teamDisplayNamesItem);
     tournamentMenu.add(resultInputTableItem);
     tournamentMenu.add(tournamentResultsItem);
@@ -414,6 +418,19 @@ public class MainController {
     }
   }
 
+  class CreateLineUpSheetsAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
+    public CreateLineUpSheetsAction() {
+      super("Create team line up sheets");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      m_tournamentController.createTournamentLineUp();
+    }
+  }
+
   class CreateScoreSheetAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
@@ -548,8 +565,9 @@ public class MainController {
 
     @Override
     public void actionPerformed(ActionEvent arg0) {
-      JOptionPane.showMessageDialog(null, new HtmlPanel("help/about.html", 300,
-          200), "About", JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(null,
+          new HtmlPanel("help/about.html", 300, 200), "About",
+          JOptionPane.INFORMATION_MESSAGE);
     }
   }
 
@@ -560,8 +578,9 @@ public class MainController {
     }
 
     public void actionPerformed(ActionEvent arg0) {
-      JOptionPane.showMessageDialog(null, new HtmlPanel("help/contents.html",
-          600, 350), "Contents", JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(null,
+          new HtmlPanel("help/contents.html", 600, 350), "Contents",
+          JOptionPane.INFORMATION_MESSAGE);
     }
   }
 
@@ -603,7 +622,8 @@ public class MainController {
   }
 
   @Deprecated
-  private void updateAppData(InputStream validationXmlData, InputStream xmlData) {
+  private void updateAppData(InputStream validationXmlData,
+      InputStream xmlData) {
     try {
       SchemaFactory factory = SchemaFactory
           .newInstance("http://www.w3.org/2001/XMLSchema");
@@ -621,8 +641,8 @@ public class MainController {
       // TODO: Admin data cannot be deleted due to tournament constraints
       m_dbConnection.deleteAdminData();
       for (Official official : handler.getOfficials()) {
-        OfficialLevel level = m_dbConnection.getOfficialLevelByName(official
-            .getOfficialLevel().getLevelName());
+        OfficialLevel level = m_dbConnection
+            .getOfficialLevelByName(official.getOfficialLevel().getLevelName());
         official.setOfficialLevel(level);
         official.setAdminData(true);
         m_dbConnection.insertOfficial(official);
@@ -631,8 +651,8 @@ public class MainController {
       Map<Team, List<Staff>> teamStaff = handler.getTeamStaff();
 
       for (Team team : teamStaff.keySet()) {
-        Team dbTeam = m_dbConnection.getTeamByNameAndCountry(
-            team.getTeamName(), team.getCountry());
+        Team dbTeam = m_dbConnection.getTeamByNameAndCountry(team.getTeamName(),
+            team.getCountry());
         if (dbTeam == null) {
           team.setAdminData(true);
           Integer teamId = m_dbConnection.insertTeam(team);
@@ -649,8 +669,8 @@ public class MainController {
 
       Map<Team, List<Player>> teamPlayers = handler.getTeamPlayers();
       for (Team team : teamPlayers.keySet()) {
-        Team dbTeam = m_dbConnection.getTeamByNameAndCountry(
-            team.getTeamName(), team.getCountry());
+        Team dbTeam = m_dbConnection.getTeamByNameAndCountry(team.getTeamName(),
+            team.getCountry());
         if (dbTeam == null) {
           team.setAdminData(true);
           Integer teamId = m_dbConnection.insertTeam(team);
