@@ -225,8 +225,6 @@ public class PdfFieldConverter {
     Map<String, String> dataMap = new HashMap<String, String>();
 
     dataMap.put(FIELD_TEAM_A_NAME, teamName);
-    // gameInformationMap.put(FIELD_TEAM_A_SHORT_NAME,
-    // tournamentGame.getTeamA().getSimpleName());
 
     int loopCount = 1;
     Collections.sort(teamPlayers, new TournamentPlayerComparator());

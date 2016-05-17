@@ -1138,7 +1138,7 @@ public class TournamentController {
         .getTournamentTeams(m_tournament.getId());
     for (TournamentTeam team : tournamentTeams) {
       final InputStream lineUpSheetTemplate = m_classLoader
-          .getResourceAsStream("data/lineUpSheet.pdf");
+          .getResourceAsStream("data/TournamentLineUpSheet.pdf");
       List<TournamentPlayer> players = m_dbConnection
           .getTournamentTeamPlayers(team.getId());
       List<TournamentStaff> staff = m_dbConnection
