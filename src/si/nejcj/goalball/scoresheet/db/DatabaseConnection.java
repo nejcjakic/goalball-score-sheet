@@ -1127,6 +1127,24 @@ public class DatabaseConnection {
   }
 
   /**
+   * Returns games at the given tournament within given range
+   * 
+   * @param tournamentId
+   *          ID of the tournament
+   * @param fromGame
+   *          First game of range to return
+   * @param toGame
+   *          Last game of range to return
+   * @return List of games at the given tournament
+   * @throws InternalTechnicalException
+   *           If problem with database occurs.
+   */
+  public List<TournamentGame> getTournamentGames(Integer tournamentId,
+      int fromGame, int toGame) {
+    return getTournamentGamesByVenue(tournamentId, null, fromGame, toGame);
+  }
+
+  /**
    * Returns all games at the given tournament
    * 
    * @param tournamentId
@@ -1321,8 +1339,9 @@ public class DatabaseConnection {
   }
 
   public Map<TournamentOfficial, List<RefereeGame>> getRefereeGames(
-      int tournamentId) {
-    List<TournamentGame> tournamentGames = getTournamentGames(tournamentId);
+      int tournamentId, int fromGame, int toGame) {
+    List<TournamentGame> tournamentGames = getTournamentGames(tournamentId,
+        fromGame, toGame);
     Map<TournamentOfficial, List<RefereeGame>> stats = new HashMap<>();
     for (TournamentGame game : tournamentGames) {
       handleRefGames(stats, game, game.getReferee1(), "Referee TS");

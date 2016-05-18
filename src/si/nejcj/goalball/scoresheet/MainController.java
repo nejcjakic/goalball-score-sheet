@@ -212,37 +212,50 @@ public class MainController {
     toolsMenu.add(updateDbData);
     menuBar.add(toolsMenu);
 
-    // Tournament menu
-    JMenu tournamentMenu = new JMenu("Tournament");
+    // Reports menu
+    JMenu reportsMenu = new JMenu("Reports");
+
+    // Referees menu items
+    JMenu refereesMenu = new JMenu("Referees");
+    JMenuItem refScheduleItem = new JMenuItem(
+        new CreateRefereeScheduleAction());
+    JMenuItem refereeSheetsItem = new JMenuItem(
+        new CreateRefereeGamesSheetsAction());
+    refereesMenu.add(refScheduleItem);
+    refereesMenu.add(refereeSheetsItem);
+
+    // Games menu items
+    JMenu gamesMenu = new JMenu("Games");
     JMenuItem scoreSheetItem = new JMenuItem(new CreateScoreSheetAction());
     JMenuItem allScoreSheetsItem = new JMenuItem(
         new CreateAllScoreSheetsAction());
     JMenuItem teamScheduleItem = new JMenuItem(new CreateTeamScheduleAction());
-    JMenuItem refScheduleItem = new JMenuItem(
-        new CreateRefereeScheduleAction());
     JMenuItem teamDisplayNamesItem = new JMenuItem(
         new CreateTeamDisplayNamesAction());
     JMenuItem teamLineUpSheetsItem = new JMenuItem(
         new CreateLineUpSheetsAction());
+    gamesMenu.add(scoreSheetItem);
+    gamesMenu.add(allScoreSheetsItem);
+    gamesMenu.add(teamScheduleItem);
+    gamesMenu.add(teamDisplayNamesItem);
+    gamesMenu.add(teamLineUpSheetsItem);
+
+    // Results menu
+    JMenu resultsMenu = new JMenu("Results");
     JMenuItem resultInputTableItem = new JMenuItem(
         new CreateResultsInputTable());
     JMenuItem tournamentResultsItem = new JMenuItem(
         new CreateTournamentResultsAction());
     JMenuItem tournamentStatsItem = new JMenuItem(
         new CreateTournamentStatsAction());
-    JMenuItem refereeSheetsItem = new JMenuItem(
-        new CreateRefereeGamesSheetsAction());
-    tournamentMenu.add(scoreSheetItem);
-    tournamentMenu.add(allScoreSheetsItem);
-    tournamentMenu.add(teamScheduleItem);
-    tournamentMenu.add(refScheduleItem);
-    tournamentMenu.add(teamLineUpSheetsItem);
-    tournamentMenu.add(teamDisplayNamesItem);
-    tournamentMenu.add(resultInputTableItem);
-    tournamentMenu.add(tournamentResultsItem);
-    tournamentMenu.add(tournamentStatsItem);
-    tournamentMenu.add(refereeSheetsItem);
-    menuBar.add(tournamentMenu);
+    resultsMenu.add(resultInputTableItem);
+    resultsMenu.add(tournamentResultsItem);
+    resultsMenu.add(tournamentStatsItem);
+
+    reportsMenu.add(refereesMenu);
+    reportsMenu.add(gamesMenu);
+    reportsMenu.add(resultsMenu);
+    menuBar.add(reportsMenu);
 
     // Help menu
     JMenu helpMenu = new JMenu("Help");

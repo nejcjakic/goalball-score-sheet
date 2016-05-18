@@ -61,6 +61,7 @@ import si.nejcj.goalball.scoresheet.tournament.model.TournamentPlayersTableModel
 import si.nejcj.goalball.scoresheet.tournament.model.TournamentStaffMembersTableModel;
 import si.nejcj.goalball.scoresheet.tournament.model.TournamentTeamsTableModel;
 import si.nejcj.goalball.scoresheet.tournament.panel.GameResultsPanel;
+import si.nejcj.goalball.scoresheet.tournament.panel.GameSelectionPanel;
 import si.nejcj.goalball.scoresheet.tournament.panel.ManageTournamentTeamPanel;
 import si.nejcj.goalball.scoresheet.tournament.panel.RefereeSchedulePanel;
 import si.nejcj.goalball.scoresheet.tournament.panel.TournamentDataPanel;
@@ -1318,50 +1319,95 @@ public class TournamentController {
   }
 
   public void createRefereeGamesSheets() {
-    Map<TournamentOfficial, List<RefereeGame>> refereeGames = m_dbConnection
-        .getRefereeGames(m_tournament.getId());
+    try {
+      final GameSelectionPanel gameSelectionPanel = new GameSelectionPanel();
+      final JOptionPane gameSelectionPane = new JOptionPane(gameSelectionPanel,
+          JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+      final JDialog gameSelectionDialog = gameSelectionPane
+          .createDialog("Select games");
+      gameSelectionDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
-    final String fileSuffix = "pdf";
-    final JFileChooser fileChooser = new JFileChooser(m_tournamentStatsSaveDir);
-    fileChooser.setAcceptAllFileFilterUsed(false);
-    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-    fileChooser
-        .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
-    StringBuilder defaultFileName = new StringBuilder();
-    defaultFileName.append("Referee games");
-    fileChooser.setSelectedFile(new File(defaultFileName.toString()));
-    fileChooser.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent evt) {
-        if (evt.getActionCommand().startsWith("Approve")) {
-          File destFile;
-          m_tournamentStatsSaveDir = fileChooser.getCurrentDirectory();
-          String fileName = fileChooser.getSelectedFile().toString();
+      gameSelectionDialog.setModal(true);
+      gameSelectionDialog.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent we) {
+          // Window can only be closed by pressing OK or Cancel
+        }
+      });
+      gameSelectionPane.addPropertyChangeListener(new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent e) {
+          String prop = e.getPropertyName();
 
-          if (fileName.endsWith("." + fileSuffix)) {
-            destFile = new File(fileName);
-          } else {
-            destFile = new File(fileName + "." + fileSuffix);
+          if (e.getSource() == gameSelectionPane
+              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+            if (e.getNewValue() instanceof Integer
+                && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              gameSelectionDialog.setVisible(false);
+              return;
+            }
+            gameSelectionDialog.setVisible(false);
           }
+        }
+      });
+      gameSelectionDialog.pack();
+      gameSelectionDialog.setVisible(true);
 
-          if (destFile.exists()) {
-            int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
-                "File allready exists!\n" + "Overwrite file?", "File exists",
-                JOptionPane.OK_CANCEL_OPTION);
+      Integer value = (Integer) gameSelectionPane.getValue();
+      if (value == null || value != JOptionPane.OK_OPTION) {
+        return;
+      }
+      final Integer fromGame = gameSelectionPanel.getFromGame();
+      final Integer toGame = gameSelectionPanel.getToGame();
 
-            if (selectedInd == JOptionPane.OK_OPTION) {
+      Map<TournamentOfficial, List<RefereeGame>> refereeGames = m_dbConnection
+          .getRefereeGames(m_tournament.getId(), fromGame, toGame);
+
+      final String fileSuffix = "pdf";
+      final JFileChooser fileChooser = new JFileChooser(
+          m_tournamentStatsSaveDir);
+      fileChooser.setAcceptAllFileFilterUsed(false);
+      fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+      fileChooser
+          .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
+      StringBuilder defaultFileName = new StringBuilder();
+      defaultFileName.append("Referee games");
+      fileChooser.setSelectedFile(new File(defaultFileName.toString()));
+      fileChooser.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+          if (evt.getActionCommand().startsWith("Approve")) {
+            File destFile;
+            m_tournamentStatsSaveDir = fileChooser.getCurrentDirectory();
+            String fileName = fileChooser.getSelectedFile().toString();
+
+            if (fileName.endsWith("." + fileSuffix)) {
+              destFile = new File(fileName);
+            } else {
+              destFile = new File(fileName + "." + fileSuffix);
+            }
+
+            if (destFile.exists()) {
+              int selectedInd = JOptionPane.showConfirmDialog(m_tournamentPanel,
+                  "File allready exists!\n" + "Overwrite file?", "File exists",
+                  JOptionPane.OK_CANCEL_OPTION);
+
+              if (selectedInd == JOptionPane.OK_OPTION) {
+                TournamentRefereesUtil.createRefereeGamesSheets(destFile,
+                    refereeGames);
+              }
+            } else {
+              // if file is not found create and save it!
               TournamentRefereesUtil.createRefereeGamesSheets(destFile,
                   refereeGames);
             }
-          } else {
-            // if file is not found create and save it!
-            TournamentRefereesUtil.createRefereeGamesSheets(destFile,
-                refereeGames);
           }
         }
-      }
-    });
+      });
 
-    fileChooser.showSaveDialog(m_tournamentPanel);
+      fileChooser.showSaveDialog(m_tournamentPanel);
+    } catch (InternalTechnicalException ex) {
+      ErrorHandler.sysErr("Problem creating score sheet", ex.getMessage(), ex);
+    } catch (Throwable t) {
+      ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+    }
   }
 
   class GameResultsAction extends AbstractAction {
