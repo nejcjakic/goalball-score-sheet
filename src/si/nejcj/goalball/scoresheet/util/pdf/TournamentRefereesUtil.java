@@ -19,7 +19,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentGame;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentOfficial;
 import si.nejcj.goalball.scoresheet.db.entity.util.RefereeGame;
-import si.nejcj.goalball.scoresheet.db.entity.util.TournamentStats;
+import si.nejcj.goalball.scoresheet.db.entity.util.RefereeStats;
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
 
 public class TournamentRefereesUtil extends PdfUtil {
@@ -138,10 +138,10 @@ public class TournamentRefereesUtil extends PdfUtil {
     }
   }
 
-  public static void createTournamentStats(File file,
-      final List<TournamentStats> tournamentStats) {
+  public static void createRefereeStats(File file,
+      final List<RefereeStats> refereeStats) {
     try {
-      Collections.sort(tournamentStats);
+      Collections.sort(refereeStats);
 
       Rectangle a4Size = PageSize.A4;
       Document document = new Document(
@@ -149,7 +149,7 @@ public class TournamentRefereesUtil extends PdfUtil {
       PdfWriter.getInstance(document, new FileOutputStream(file));
       document.open();
 
-      document.add(new Paragraph("Tournament Stats"));
+      document.add(new Paragraph("Referee Stats"));
       document.add(new Paragraph(" "));
 
       PdfPTable table = new PdfPTable(5);
@@ -161,7 +161,7 @@ public class TournamentRefereesUtil extends PdfUtil {
       table.addCell(new Phrase("Games as goal judge", TITLE_ROW_FONT));
       table.addCell(new Phrase("Total games", TITLE_ROW_FONT));
 
-      for (TournamentStats stats : tournamentStats) {
+      for (RefereeStats stats : refereeStats) {
         table.addCell(new Phrase(stats.getTournamentOfficial().getFullName(),
             DATA_ROW_FONT));
         table.addCell(new Phrase(stats.getGamesAsReferee(), DATA_ROW_FONT));

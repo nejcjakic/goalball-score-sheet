@@ -221,8 +221,11 @@ public class MainController {
         new CreateRefereeScheduleAction());
     JMenuItem refereeSheetsItem = new JMenuItem(
         new CreateRefereeGamesSheetsAction());
+    JMenuItem refereeStatsItem = new JMenuItem(
+        new CreateRefereeStatsAction());
     refereesMenu.add(refScheduleItem);
     refereesMenu.add(refereeSheetsItem);
+    refereesMenu.add(refereeStatsItem);
 
     // Games menu items
     JMenu gamesMenu = new JMenu("Games");
@@ -246,11 +249,8 @@ public class MainController {
         new CreateResultsInputTable());
     JMenuItem tournamentResultsItem = new JMenuItem(
         new CreateTournamentResultsAction());
-    JMenuItem tournamentStatsItem = new JMenuItem(
-        new CreateTournamentStatsAction());
     resultsMenu.add(resultInputTableItem);
     resultsMenu.add(tournamentResultsItem);
-    resultsMenu.add(tournamentStatsItem);
 
     reportsMenu.add(refereesMenu);
     reportsMenu.add(gamesMenu);
@@ -540,17 +540,17 @@ public class MainController {
     }
   }
 
-  class CreateTournamentStatsAction extends AbstractAction {
+  class CreateRefereeStatsAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
 
-    public CreateTournamentStatsAction() {
-      super("Create tournament statistics");
+    public CreateRefereeStatsAction() {
+      super("Create referee statistics");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createTournamentStats();
+      m_tournamentController.createRefereeStats();
     }
   }
 

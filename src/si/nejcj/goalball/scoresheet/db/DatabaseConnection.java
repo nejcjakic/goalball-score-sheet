@@ -32,7 +32,7 @@ import si.nejcj.goalball.scoresheet.db.entity.TournamentPlayer;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentStaff;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentTeam;
 import si.nejcj.goalball.scoresheet.db.entity.util.RefereeGame;
-import si.nejcj.goalball.scoresheet.db.entity.util.TournamentStats;
+import si.nejcj.goalball.scoresheet.db.entity.util.RefereeStats;
 import si.nejcj.goalball.scoresheet.db.entity.util.TournamentStatsType;
 import si.nejcj.goalball.scoresheet.exception.business.InternalBusinessException;
 import si.nejcj.goalball.scoresheet.exception.business.InternalIntegrityConstraintException;
@@ -1374,9 +1374,9 @@ public class DatabaseConnection {
         new RefereeGame(game.getGameNumber(), game.getGameTime(), position));
   }
 
-  public List<TournamentStats> getTournamentRefStats(int tournamentId) {
+  public List<RefereeStats> getTournamentRefStats(int tournamentId) {
     List<TournamentGame> tournamentGames = getTournamentGames(tournamentId);
-    List<TournamentStats> statsList = new ArrayList<TournamentStats>();
+    List<RefereeStats> statsList = new ArrayList<RefereeStats>();
     for (TournamentGame game : tournamentGames) {
       // REFEREES
       handleStats(statsList, game.getReferee1(), TournamentStatsType.REFEREE,
@@ -1410,13 +1410,13 @@ public class DatabaseConnection {
     return statsList;
   }
 
-  private void handleStats(List<TournamentStats> statsList,
+  private void handleStats(List<RefereeStats> statsList,
       TournamentOfficial official, TournamentStatsType type, Date gameDate) {
     if (official == null) {
       return;
     }
 
-    TournamentStats stats = new TournamentStats(official);
+    RefereeStats stats = new RefereeStats(official);
     if (statsList.contains(stats)) {
       stats = statsList.get(statsList.indexOf(stats));
     } else {

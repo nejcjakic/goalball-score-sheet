@@ -52,7 +52,7 @@ import si.nejcj.goalball.scoresheet.db.entity.TournamentStaff;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentTeam;
 import si.nejcj.goalball.scoresheet.db.entity.util.GameResult;
 import si.nejcj.goalball.scoresheet.db.entity.util.RefereeGame;
-import si.nejcj.goalball.scoresheet.db.entity.util.TournamentStats;
+import si.nejcj.goalball.scoresheet.db.entity.util.RefereeStats;
 import si.nejcj.goalball.scoresheet.exception.business.InternalIntegrityConstraintException;
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
 import si.nejcj.goalball.scoresheet.tournament.model.TournamentGamesTableModel;
@@ -1271,8 +1271,8 @@ public class TournamentController {
         new File(parent, lineUpSheetTeamBFileName));
   }
 
-  public void createTournamentStats() {
-    final List<TournamentStats> tournamentStats = m_dbConnection
+  public void createRefereeStats() {
+    final List<RefereeStats> refereeStats = m_dbConnection
         .getTournamentRefStats(m_tournament.getId());
 
     final String fileSuffix = "pdf";
@@ -1282,7 +1282,7 @@ public class TournamentController {
     fileChooser
         .setFileFilter(new FileNameExtensionFilter("PDF file", fileSuffix));
     StringBuilder defaultFileName = new StringBuilder();
-    defaultFileName.append("Tournament Stats");
+    defaultFileName.append("Referee Stats");
     fileChooser.setSelectedFile(new File(defaultFileName.toString()));
     fileChooser.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent evt) {
@@ -1303,13 +1303,13 @@ public class TournamentController {
                 JOptionPane.OK_CANCEL_OPTION);
 
             if (selectedInd == JOptionPane.OK_OPTION) {
-              TournamentRefereesUtil.createTournamentStats(destFile,
-                  tournamentStats);
+              TournamentRefereesUtil.createRefereeStats(destFile,
+                  refereeStats);
             }
           } else {
             // if file is not found create and save it!
-            TournamentRefereesUtil.createTournamentStats(destFile,
-                tournamentStats);
+            TournamentRefereesUtil.createRefereeStats(destFile,
+                refereeStats);
           }
         }
       }

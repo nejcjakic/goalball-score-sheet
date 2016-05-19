@@ -2,14 +2,14 @@ package si.nejcj.goalball.scoresheet.db.entity.util;
 
 import si.nejcj.goalball.scoresheet.db.entity.TournamentOfficial;
 
-public class TournamentStats implements Comparable<TournamentStats> {
+public class RefereeStats implements Comparable<RefereeStats> {
 
   private TournamentOfficial tournamentOfficial;
   private int gamesAsReferee;
   private int gamesAsTableOfficial;
   private int gamesAsGoalJudge;
 
-  public TournamentStats(TournamentOfficial official) {
+  public RefereeStats(TournamentOfficial official) {
     this.tournamentOfficial = official;
     gamesAsReferee = 0;
     gamesAsGoalJudge = 0;
@@ -66,10 +66,10 @@ public class TournamentStats implements Comparable<TournamentStats> {
     if (obj == null) {
       return false;
     }
-    if (!(obj instanceof TournamentStats)) {
+    if (!(obj instanceof RefereeStats)) {
       return false;
     }
-    TournamentStats other = (TournamentStats) obj;
+    RefereeStats other = (RefereeStats) obj;
     if (tournamentOfficial == null) {
       if (other.tournamentOfficial != null) {
         return false;
@@ -81,7 +81,7 @@ public class TournamentStats implements Comparable<TournamentStats> {
   }
 
   @Override
-  public int compareTo(TournamentStats o) {
+  public int compareTo(RefereeStats o) {
     return tournamentOfficial.getFullName().compareTo(
         o.getTournamentOfficial().getFullName());
   }
