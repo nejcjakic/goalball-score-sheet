@@ -254,59 +254,65 @@ public class TournamentDataUtil extends PdfUtil {
         document.add(createGamesResultsTable(rankGames));
       }
 
-      List<GameResult> gameResults = endResults.get(GameResult.GENERAL_GAME);
-      List<TournamentGame> tournamentGames = endGames
-          .get(GameResult.GENERAL_GAME);
-      Collections.sort(gameResults);
+      List<String> groupNames = getKeysForType(gamePools, PoolType.GENERAL);
+      if (!groupNames.isEmpty()) {
+        Collections.sort(groupNames);
+        for (String groupName : groupNames) {
+          List<GameResult> groupResults = endResults.get(groupName);
+          List<TournamentGame> groupGames = endGames.get(groupName);
+          Collections.sort(groupResults);
 
-      document.add(new Paragraph(" "));
-      document.add(new Paragraph("Pool results"));
-      document.add(new Paragraph(" "));
+          document.add(new Paragraph(" "));
+          document.add(new Paragraph(groupName + " results"));
+          document.add(new Paragraph(" "));
 
-      PdfPTable tournamentResultsTable = new PdfPTable(9);
-      tournamentResultsTable.setWidthPercentage(85);
-      tournamentResultsTable
-          .setWidths(new float[] { 1f, 5f, 2f, 2f, 2f, 2f, 2f, 2f, 2f });
-      tournamentResultsTable.setHorizontalAlignment(PdfPTable.ALIGN_LEFT);
+          PdfPTable tournamentResultsTable = new PdfPTable(9);
+          tournamentResultsTable.setWidthPercentage(85);
+          tournamentResultsTable
+              .setWidths(new float[] { 1f, 5f, 2f, 2f, 2f, 2f, 2f, 2f, 2f });
+          tournamentResultsTable.setHorizontalAlignment(PdfPTable.ALIGN_LEFT);
 
-      tournamentResultsTable.addCell(new Phrase("Pos", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("Team name", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("Wins", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("Draws", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("Loses", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("GF", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("GA", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("Dif", TITLE_ROW_FONT));
-      tournamentResultsTable.addCell(new Phrase("Points", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("Pos", TITLE_ROW_FONT));
+          tournamentResultsTable
+              .addCell(new Phrase("Team name", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("Wins", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("Draws", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("Loses", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("GF", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("GA", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("Dif", TITLE_ROW_FONT));
+          tournamentResultsTable.addCell(new Phrase("Points", TITLE_ROW_FONT));
 
-      int i = 1;
-      for (GameResult result : gameResults) {
-        tournamentResultsTable
-            .addCell(new Phrase(String.valueOf(i++), DATA_ROW_FONT));
-        tournamentResultsTable
-            .addCell(new Phrase(result.getTeamName(), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getWins()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getDraws()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getLosses()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getGoalsScored()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(new Phrase(
-            String.valueOf(result.getGoalsConceded()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(new Phrase(
-            String.valueOf(result.getGoalDifference()), DATA_ROW_FONT));
-        tournamentResultsTable.addCell(
-            new Phrase(String.valueOf(result.getPoints()), TITLE_ROW_FONT));
+          int i = 1;
+          for (GameResult result : groupResults) {
+            tournamentResultsTable
+                .addCell(new Phrase(String.valueOf(i++), DATA_ROW_FONT));
+            tournamentResultsTable
+                .addCell(new Phrase(result.getTeamName(), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(
+                new Phrase(String.valueOf(result.getWins()), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(
+                new Phrase(String.valueOf(result.getDraws()), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(
+                new Phrase(String.valueOf(result.getLosses()), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(new Phrase(
+                String.valueOf(result.getGoalsScored()), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(new Phrase(
+                String.valueOf(result.getGoalsConceded()), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(new Phrase(
+                String.valueOf(result.getGoalDifference()), DATA_ROW_FONT));
+            tournamentResultsTable.addCell(
+                new Phrase(String.valueOf(result.getPoints()), TITLE_ROW_FONT));
+          }
+          document.add(tournamentResultsTable);
+
+          document.add(new Paragraph(" "));
+          document.add(new Paragraph("Pool game results"));
+          document.add(new Paragraph(" "));
+
+          document.add(createGamesResultsTable(groupGames));
+        }
       }
-      document.add(tournamentResultsTable);
-
-      document.add(new Paragraph(" "));
-      document.add(new Paragraph("Pool game results"));
-      document.add(new Paragraph(" "));
-
-      document.add(createGamesResultsTable(tournamentGames));
 
       document.add(new Paragraph(" "));
       document.add(new Paragraph("Top scorers"));
@@ -387,6 +393,19 @@ public class TournamentDataUtil extends PdfUtil {
     FINAL, SEMI_FINAL, PLACE_3, PLACE_5, QUARTER_FINAL, RANK, GENERAL;
   }
 
+  private static List<String> getKeysForType(Set<String> keySet,
+      PoolType type) {
+    List<String> keys = new ArrayList<>();
+    if (type == PoolType.GENERAL) {
+      for (String key : keySet) {
+        if (key.toUpperCase().startsWith(GameResult.GENERAL_GAME)) {
+          keys.add(key);
+        }
+      }
+    }
+    return keys;
+  }
+
   private static String getKeyForType(Set<String> keySet, PoolType type) {
     for (String key : keySet) {
       switch (type) {
@@ -420,11 +439,11 @@ public class TournamentDataUtil extends PdfUtil {
           return key;
         }
         break;
-      case GENERAL:
-        if (key.equals(GameResult.GENERAL_GAME)) {
-          return key;
-        }
-        break;
+      // case GENERAL:
+      // if (key.equals(GameResult.GENERAL_GAME)) {
+      // return key;
+      // }
+      // break;
       }
     }
     return null;
