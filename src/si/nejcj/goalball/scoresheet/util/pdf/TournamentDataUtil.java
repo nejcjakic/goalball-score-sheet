@@ -227,6 +227,15 @@ public class TournamentDataUtil extends PdfUtil {
         document.add(createGamesResultsTable(place5Games));
       }
 
+      String place7key = getKeyForType(gamePools, PoolType.PLACE_7);
+      if (place7key != null) {
+        List<TournamentGame> place7Games = endGames.get(place7key);
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph("7th place game result"));
+        document.add(new Paragraph(" "));
+        document.add(createGamesResultsTable(place7Games));
+      }
+
       String semiFinalKey = getKeyForType(gamePools, PoolType.SEMI_FINAL);
       if (semiFinalKey != null) {
         List<TournamentGame> semiFinalGames = endGames.get(semiFinalKey);
@@ -390,7 +399,7 @@ public class TournamentDataUtil extends PdfUtil {
 
   // TODO: Move somewhere else
   private enum PoolType {
-    FINAL, SEMI_FINAL, PLACE_3, PLACE_5, QUARTER_FINAL, RANK, GENERAL;
+    FINAL, SEMI_FINAL, PLACE_3, PLACE_5, PLACE_7, QUARTER_FINAL, RANK, GENERAL;
   }
 
   private static List<String> getKeysForType(Set<String> keySet,
@@ -429,6 +438,11 @@ public class TournamentDataUtil extends PdfUtil {
           return key;
         }
         break;
+      case PLACE_7:
+        if (key.toUpperCase().contains("7TH")) {
+          return key;
+        }
+        break;
       case QUARTER_FINAL:
         if (key.toUpperCase().contains("QUARTER")) {
           return key;
@@ -439,11 +453,6 @@ public class TournamentDataUtil extends PdfUtil {
           return key;
         }
         break;
-      // case GENERAL:
-      // if (key.equals(GameResult.GENERAL_GAME)) {
-      // return key;
-      // }
-      // break;
       }
     }
     return null;
