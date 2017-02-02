@@ -49,6 +49,21 @@
     </fileset>
   </path>
 
+	
+
+	<pathconvert property="mf.classpath" pathsep=" ">
+		<path refid="compile.classpath"/>
+		<mapper>
+			<chainedmapper>
+				<flattenmapper/>
+				<globmapper from="*.jar" to="lib/*.jar"/>
+			</chainedmapper>
+		</mapper>
+	</pathconvert>
+		
+	
+	
+	
   <target name="clean" description="Deletes all generated files.">
     <delete dir="${build.home}" />
     <delete dir="${deploy.home}" />
@@ -95,6 +110,33 @@
 
     </jar>
   </target>
+	
+	<target name="packagejar" depends="compile" description="Creates packaged jar file with dependencies">
+	<jar destfile="${jar.home}/temp_final.jar" basedir="${build.home}" filesetmanifest="skip">
+	    <zipgroupfileset dir="${lib}" includes="*.jar" excludes="META-INF/**/*"/>
+	   <!-- <zipgroupfileset dir="${jar.home}" includes="${jar.name}" />-->
+
+	    <manifest>
+	        <attribute name="Main-Class" value="${mainClass}"/>
+	        <attribute name="Class-Path" value="${mf.classpath}"/>
+	    </manifest>
+		
+	      <fileset dir="${source}">
+	        <include name="images/16x16/*.png" />
+	        <include name="images/64x64/*.png" />
+	        <include name="help/*.html" />
+	        <include name="data/*.pdf" />
+	        <include name="data/*.xsd" />
+	        <include name="data/*.xml" />
+
+	        <exclude name="help/*.tok" />
+	        <exclude name="*.svn" />
+
+	        <include name="sounds/*.wav" />
+	        <exclude name="*.svn" />
+	      </fileset>
+	</jar>
+	</target>
 
   <target name="signjar" depends="jar" description="Digitally sign the jar file">
 
