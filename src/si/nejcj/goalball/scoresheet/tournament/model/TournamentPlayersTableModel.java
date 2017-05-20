@@ -2,6 +2,7 @@ package si.nejcj.goalball.scoresheet.tournament.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -21,20 +22,24 @@ public class TournamentPlayersTableModel extends AbstractTableModel {
 
   private List<TournamentPlayer> allPlayers;
   private List<TournamentPlayer> selectedPlayers;
+  private List<TournamentPlayer> existingPlayers;
 
   public TournamentPlayersTableModel(List<TournamentPlayer> players) {
     this.allPlayers = players;
-    this.selectedPlayers = new ArrayList<TournamentPlayer>();
+    this.selectedPlayers = new ArrayList<>();
   }
 
   public TournamentPlayersTableModel(List<TournamentPlayer> players,
-      List<TournamentPlayer> selectedPlayers) {
+      List<TournamentPlayer> existingPlayers) {
     this.allPlayers = players;
-    this.selectedPlayers = selectedPlayers;
-    for (TournamentPlayer tournamentPlayer : selectedPlayers) {
+    this.existingPlayers = existingPlayers.stream()
+        .collect(Collectors.toList());
+    this.selectedPlayers = existingPlayers.stream()
+        .collect(Collectors.toList());
+
+    for (TournamentPlayer tournamentPlayer : existingPlayers) {
       for (TournamentPlayer player : allPlayers) {
         if (tournamentPlayer.hasEqualData(player)) {
-          tournamentPlayer.setId(player.getId());
           allPlayers.remove(player);
           allPlayers.add(tournamentPlayer);
           break;
@@ -123,4 +128,23 @@ public class TournamentPlayersTableModel extends AbstractTableModel {
     return selectedPlayers;
   }
 
+  public List<TournamentPlayer> getRemovedPlayers() {
+    List<TournamentPlayer> removedPlayers = existingPlayers.stream()
+        .collect(Collectors.toList());
+    removedPlayers.removeAll(selectedPlayers);
+    return removedPlayers;
+  }
+
+  public List<TournamentPlayer> getUpdatedPlayers() {
+    // Present in existing and in selected
+    return existingPlayers.stream().filter(selectedPlayers::contains)
+        .collect(Collectors.toList());
+  }
+
+  public List<TournamentPlayer> getAddedPlayers() {
+    List<TournamentPlayer> addedPlayers = selectedPlayers.stream()
+        .collect(Collectors.toList());
+    addedPlayers.removeAll(existingPlayers);
+    return addedPlayers;
+  }
 }

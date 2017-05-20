@@ -40,7 +40,6 @@ public class ManageTeamDataPanel extends JPanel {
       ActionListener teamSelectionListener) {
     selectionCB.setModel(selectionModel);
     selectionCB.addActionListener(teamSelectionListener);
-    // TODO: If no team is selected NPE is thrown
     selectionCB.setSelectedIndex(0);
   }
 

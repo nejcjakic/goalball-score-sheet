@@ -2,6 +2,7 @@ package si.nejcj.goalball.scoresheet.tournament.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -23,6 +24,7 @@ public class TournamentStaffMembersTableModel extends AbstractTableModel {
 
   private List<TournamentStaff> allStaffMembers;
   private List<TournamentStaff> selectedStaffMembers;
+  private List<TournamentStaff> existingStaffMembers;
 
   public TournamentStaffMembersTableModel(List<TournamentStaff> staffMembers) {
     this.allStaffMembers = staffMembers;
@@ -30,13 +32,15 @@ public class TournamentStaffMembersTableModel extends AbstractTableModel {
   }
 
   public TournamentStaffMembersTableModel(List<TournamentStaff> staffMembers,
-      List<TournamentStaff> selectedStaffMembers) {
+      List<TournamentStaff> existingStaffMembers) {
     this.allStaffMembers = staffMembers;
-    this.selectedStaffMembers = selectedStaffMembers;
-    for (TournamentStaff tournamentStaff : selectedStaffMembers) {
+    this.existingStaffMembers = existingStaffMembers.stream()
+        .collect(Collectors.toList());
+    this.selectedStaffMembers = existingStaffMembers.stream()
+        .collect(Collectors.toList());
+    for (TournamentStaff tournamentStaff : existingStaffMembers) {
       for (TournamentStaff staff : allStaffMembers) {
         if (tournamentStaff.isEqualPerson(staff)) {
-          tournamentStaff.setId(staff.getId());
           allStaffMembers.remove(staff);
           allStaffMembers.add(tournamentStaff);
           break;
@@ -111,5 +115,19 @@ public class TournamentStaffMembersTableModel extends AbstractTableModel {
 
   public List<TournamentStaff> getSelectedStaffMembers() {
     return selectedStaffMembers;
+  }
+
+  public List<TournamentStaff> getRemovedStaffMembers() {
+    List<TournamentStaff> removedStaffMembers = existingStaffMembers.stream()
+        .collect(Collectors.toList());
+    removedStaffMembers.removeAll(selectedStaffMembers);
+    return removedStaffMembers;
+  }
+
+  public List<TournamentStaff> getAddedStaffMembers() {
+    List<TournamentStaff> addedStaffMembers = selectedStaffMembers.stream()
+        .collect(Collectors.toList());
+    addedStaffMembers.removeAll(existingStaffMembers);
+    return addedStaffMembers;
   }
 }

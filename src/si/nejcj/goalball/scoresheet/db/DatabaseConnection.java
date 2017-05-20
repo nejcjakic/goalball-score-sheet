@@ -1886,6 +1886,24 @@ public class DatabaseConnection {
   }
 
   /**
+   * Updates the tournament player in database
+   * 
+   * @param player
+   *          Player to be updated
+   * @throws InternalTechnicalException
+   *           If problem with database occurs.
+   */
+  public void updateTournamentPlayer(TournamentPlayer player) {
+    String query = "UPDATE tournament_player SET player_number = ? WHERE id = ?";
+    try {
+      queryRunner.update(query, player.getPlayerNumber(), player.getId());
+    } catch (SQLException e) {
+      throw new InternalTechnicalException("Problem updating tournament player",
+          e);
+    }
+  }
+
+  /**
    * Sets the game score for the given game
    * 
    * @param gameId
@@ -2087,19 +2105,43 @@ public class DatabaseConnection {
   }
 
   /**
-   * Deletes all participants (staff and players) for the given tournament team.
+   * Deletes tournament player
    * 
-   * @param tournamentTeamId
+   * @param playerId
+   *          Id of the player to be deleted
+   * @throws InternalTechnicalException
+   *           If problem with database occurs.
    */
-  public void deleteTournamentTeamParticipants(Integer tournamentTeamId) {
-    String deleteTournamentPlayerQuery = "DELETE FROM tournament_player WHERE tournament_team_id = ?";
-    String deleteTournamentStaffQuery = "DELETE FROM tournament_staff WHERE tournament_team_id = ?";
+  public void deleteTournamentTeamPlayer(Integer playerId) {
+    String deleteTournamentPlayerQuery = "DELETE FROM tournament_player WHERE id = ?";
     try {
-      queryRunner.update(deleteTournamentPlayerQuery, tournamentTeamId);
-      queryRunner.update(deleteTournamentStaffQuery, tournamentTeamId);
+      queryRunner.update(deleteTournamentPlayerQuery, playerId);
+    } catch (SQLException e) {
+      if (e.getMessage() != null
+          && e.getMessage().startsWith("Integrity constraint violation")) {
+        throw new InternalIntegrityConstraintException(
+            "Player scored at one of the games and can not be deleted", e);
+      }
+      throw new InternalTechnicalException(
+          "Problem deleting tournament player data", e);
+    }
+  }
+
+  /**
+   * Deletes tournament staff
+   * 
+   * @param staffId
+   *          Id of the staff to be deleted
+   * @throws InternalTechnicalException
+   *           If problem with database occurs.
+   */
+  public void deleteTournamentTeamStaff(Integer staffId) {
+    String deleteTournamentStaffQuery = "DELETE FROM tournament_staff WHERE id = ?";
+    try {
+      queryRunner.update(deleteTournamentStaffQuery, staffId);
     } catch (SQLException e) {
       throw new InternalTechnicalException(
-          "Problem deleting tournament team data", e);
+          "Problem deleting tournament staff data", e);
     }
   }
 

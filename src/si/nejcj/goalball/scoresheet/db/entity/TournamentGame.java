@@ -102,7 +102,7 @@ public class TournamentGame extends BasicEntity<TournamentGame> implements
   }
 
   public String getPool() {
-    return pool;
+    return pool == null ? "" : pool;
   }
 
   public void setPool(String pool) {

@@ -390,19 +390,27 @@ public class TournamentController {
         Integer value = (Integer) optionPane.getValue();
         if (value != null && value == JOptionPane.OK_OPTION) {
           try {
-            m_dbConnection.deleteTournamentTeamParticipants(tournamentTeamId);
-            List<TournamentPlayer> selectedPlayers = playersTableModel
-                .getSelectedPlayers();
-            List<TournamentStaff> selectedStaffMembers = staffTableModel
-                .getSelectedStaffMembers();
-            for (TournamentPlayer player : selectedPlayers) {
+            List<TournamentPlayer> removedPlayers = playersTableModel
+                .getRemovedPlayers();
+            List<TournamentPlayer> updatedPlayers = playersTableModel
+                .getUpdatedPlayers();
+            List<TournamentPlayer> addedPlayers = playersTableModel
+                .getAddedPlayers();
+
+            for (TournamentPlayer player : removedPlayers) {
+              m_dbConnection.deleteTournamentTeamPlayer(player.getId());
+            }
+
+            for (TournamentPlayer player : updatedPlayers) {
+              m_dbConnection.updateTournamentPlayer(player);
+            }
+
+            for (TournamentPlayer player : addedPlayers) {
               m_dbConnection.insertTournamentPlayer(player.getId(),
                   tournamentTeamId, player.getPlayerNumber());
             }
-            for (TournamentStaff staffMember : selectedStaffMembers) {
-              m_dbConnection.insertTournamentStaff(staffMember.getId(),
-                  tournamentTeamId);
-            }
+          } catch (InternalIntegrityConstraintException ex) {
+            ErrorHandler.userWrn(ex.getMessage());
           } catch (InternalTechnicalException ex) {
             ErrorHandler.sysErr("Problem adding team to tournament",
                 ex.getMessage(), ex);
@@ -1076,6 +1084,7 @@ public class TournamentController {
         }
       }
     }
+
   }
 
   public void createAllScoreSheets() {
@@ -1303,13 +1312,11 @@ public class TournamentController {
                 JOptionPane.OK_CANCEL_OPTION);
 
             if (selectedInd == JOptionPane.OK_OPTION) {
-              TournamentRefereesUtil.createRefereeStats(destFile,
-                  refereeStats);
+              TournamentRefereesUtil.createRefereeStats(destFile, refereeStats);
             }
           } else {
             // if file is not found create and save it!
-            TournamentRefereesUtil.createRefereeStats(destFile,
-                refereeStats);
+            TournamentRefereesUtil.createRefereeStats(destFile, refereeStats);
           }
         }
       }
