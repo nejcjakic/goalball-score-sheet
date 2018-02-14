@@ -45,6 +45,10 @@ public class TournamentGamesPanel extends JPanel {
     JButton gameResultsBTN = new JButton(
         (AbstractAction) componenentListeners
             .get(TournamentListeners.GAME_RESULTS));
+    
+    JButton gameImportBTN = new JButton(
+        (AbstractAction) componenentListeners
+            .get(TournamentListeners.GAME_IMPORT));
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     GroupLayout groupLayout = new GroupLayout(this);
@@ -62,7 +66,8 @@ public class TournamentGamesPanel extends JPanel {
             .addGroup(
                 groupLayout.createParallelGroup(Alignment.LEADING)
                     .addComponent(gameAddBTN).addComponent(gameEditBTN)
-                    .addComponent(gameRemoveBTN).addComponent(gameResultsBTN))
+                    .addComponent(gameRemoveBTN).addComponent(gameResultsBTN)
+                    .addComponent(gameImportBTN))
             .addContainerGap()));
     groupLayout
         .setVerticalGroup(groupLayout
@@ -82,7 +87,8 @@ public class TournamentGamesPanel extends JPanel {
                     .addComponent(gameEditBTN)
                     .addPreferredGap(ComponentPlacement.RELATED)
                     .addComponent(gameRemoveBTN).addGap(31)
-                    .addComponent(gameResultsBTN)
+                    .addComponent(gameResultsBTN).addGap(45)
+                    .addComponent(gameImportBTN)
                     .addContainerGap(53, Short.MAX_VALUE)));
     setLayout(groupLayout);
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

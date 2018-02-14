@@ -90,13 +90,13 @@ public class GameResult implements Comparable<GameResult> {
     } else if (getWins() < other.getWins()) {
       return 1;
     }
-    // 4) Goals scored
-    if (getGoalsScored() > other.getGoalsScored()) {
+    // 4) Goals against
+    if (getGoalsConceded() > other.getGoalsConceded()) {
       return -1;
-    } else if (getGoalsScored() < other.getGoalsScored()) {
+    } else if (getGoalsConceded() < other.getGoalsConceded()) {
       return 1;
     }
-    // 5) Difference at half time
+    // 5) Goal difference between teams only
     // TODO: Not yet implemented
     return 0;
   }

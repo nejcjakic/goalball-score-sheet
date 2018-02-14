@@ -95,6 +95,12 @@ public class TournamentGamesTableModel extends AbstractTableModel {
     Collections.sort(allGames);
     fireTableRowsInserted(getRowCount() - 1, getRowCount() - 1);
   }
+  
+  public void addTournamentGames(List<TournamentGame> tournamentGames) {
+    allGames.addAll(tournamentGames);
+    Collections.sort(allGames);
+    fireTableDataChanged();
+  }
 
   public TournamentGame getTournamentGame(int index) {
     return allGames.get(index);

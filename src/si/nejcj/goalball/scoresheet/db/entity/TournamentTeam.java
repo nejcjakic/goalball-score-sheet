@@ -7,8 +7,8 @@ public class TournamentTeam extends Team {
   }
 
   public TournamentTeam(Integer id, String teamName, String country,
-      boolean nationalTeam) {
-    super(id, teamName, country, nationalTeam);
+      boolean nationalTeam, boolean isMale) {
+    super(id, teamName, country, nationalTeam, isMale);
   }
 
   public String getSimpleName() {

@@ -24,10 +24,11 @@ public class AddTeamPanel extends JPanel {
   private JTextField teamNameTF;
   private JCheckBox nationalTeamCB;
   private JComboBox countryCB;
+  private JCheckBox maleTeamCB;
 
   public AddTeamPanel(ComboBoxModel countries) {
     super();
-    Dimension sizeDim = new Dimension(250, 110);
+    Dimension sizeDim = new Dimension(250, 160);
     setSize(sizeDim);
     setPreferredSize(sizeDim);
     setMaximumSize(sizeDim);
@@ -52,6 +53,8 @@ public class AddTeamPanel extends JPanel {
     JLabel lblCountry = new JLabel("Country:");
     countryCB = new JComboBox(countries);
 
+    maleTeamCB = new JCheckBox("Is male team");
+
     GroupLayout groupLayout = new GroupLayout(this);
     groupLayout.setHorizontalGroup(groupLayout
         .createParallelGroup(Alignment.LEADING)
@@ -68,7 +71,8 @@ public class AddTeamPanel extends JPanel {
                             GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(countryCB, GroupLayout.PREFERRED_SIZE,
                             134, GroupLayout.PREFERRED_SIZE))
-                .addComponent(nationalTeamCB))
+                .addComponent(nationalTeamCB)
+                .addComponent(maleTeamCB))
             .addContainerGap(29, Short.MAX_VALUE)));
     groupLayout
         .setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
@@ -84,6 +88,7 @@ public class AddTeamPanel extends JPanel {
                     .addComponent(lblCountry).addComponent(countryCB,
                         GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                         GroupLayout.PREFERRED_SIZE))
+                .addComponent(maleTeamCB)
                 .addContainerGap(32, Short.MAX_VALUE)));
     setLayout(groupLayout);
   }
@@ -104,7 +109,8 @@ public class AddTeamPanel extends JPanel {
     boolean nationalTeam = nationalTeamCB.isSelected();
     String country = (String) countryCB.getSelectedItem();
     String teamName = nationalTeam ? country : teamNameTF.getText();
+    boolean isMale = maleTeamCB.isSelected();
 
-    return new Team(null, teamName, country, nationalTeam);
+    return new Team(null, teamName, country, nationalTeam, isMale);
   }
 }

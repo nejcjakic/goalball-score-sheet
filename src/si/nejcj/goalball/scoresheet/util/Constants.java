@@ -82,7 +82,8 @@ public class Constants {
     GAME_ADD,
     GAME_EDIT,
     GAME_REMOVE,
-    GAME_RESULTS;
+    GAME_RESULTS,
+    GAME_IMPORT;
     // @formatter:on
   }
 

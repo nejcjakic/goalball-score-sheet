@@ -13,6 +13,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EventListener;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -37,9 +40,15 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.hssf.record.DBCellRecord;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import si.nejcj.goalball.scoresheet.db.DatabaseConnection;
 import si.nejcj.goalball.scoresheet.db.entity.Official;
@@ -135,6 +144,70 @@ public class TournamentController {
     m_tournamentPanel.setTournamentGamesPanel(initTournamentGamesPanel());
   }
 
+  public void importTournamentGames(File file, Integer tournamentId)
+      throws Exception {
+    Tournament tournament = m_dbConnection.getTournamentById(tournamentId);
+
+    DataFormatter formatter = new DataFormatter();
+    DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+
+    Workbook workbook = WorkbookFactory.create(file);
+    Sheet sheet = workbook.getSheetAt(0);
+
+    List<TournamentTeam> tournamentTeams = m_dbConnection
+        .getTournamentTeams(tournamentId);
+    List<TournamentOfficial> tournamentOfficials = m_dbConnection
+        .getTournamentOfficials(tournamentId);
+
+    // Start at 2 as there is 1 empty row + header
+    for (int rowIndex = 2; rowIndex < sheet.getPhysicalNumberOfRows()
+        + 1; rowIndex++) {
+      Row row = sheet.getRow(rowIndex);
+
+      String gameNumber = formatter.formatCellValue(row.getCell(1));
+      String date = formatter.formatCellValue(row.getCell(2));
+      String time = formatter.formatCellValue(row.getCell(3));
+      String gender = formatter.formatCellValue(row.getCell(4));
+      String pool = formatter.formatCellValue(row.getCell(5));
+      String venue = formatter.formatCellValue(row.getCell(6));
+      String homeTeam = formatter.formatCellValue(row.getCell(7));
+      String awayTeam = formatter.formatCellValue(row.getCell(8));
+      String tsRef = formatter.formatCellValue(row.getCell(9));
+      String fsRef = formatter.formatCellValue(row.getCell(10));
+
+      boolean isMaleGame = "Male".equals(gender);
+
+      TournamentTeam tournamentTeamA = tournamentTeams.stream().filter(
+          t -> t.getSimpleName().equals(homeTeam) && t.isMale() == isMaleGame)
+          .findFirst().get();
+      TournamentTeam tournamentTeamB = tournamentTeams.stream().filter(
+          t -> t.getSimpleName().equals(awayTeam) && t.isMale() == isMaleGame)
+          .findFirst().get();
+      TournamentOfficial refereeTs = tournamentOfficials.stream()
+          .filter(o -> o.getFullName().equals(tsRef)).findFirst().get();
+      TournamentOfficial refereeFs = tournamentOfficials.stream()
+          .filter(o -> o.getFullName().equals(fsRef)).findFirst().get();
+
+      TournamentGame game = new TournamentGame();
+      game.setGameNumber(Integer.parseInt(gameNumber));
+      game.setGameDate(format.parse(date));
+      game.setGameTime(time);
+      game.setGender(gender);
+      game.setPool(pool);
+      game.setVenue(venue);
+      game.setTeamA(tournamentTeamA);
+      game.setTeamB(tournamentTeamB);
+      game.setReferee1(refereeTs);
+      game.setReferee2(refereeFs);
+      game.setTournament(tournament);
+      m_dbConnection.insertTournamentGame(game);
+    }
+
+    List<TournamentGame> tournamentGames = m_dbConnection
+        .getTournamentGames(tournamentId);
+    m_tournamentGamesTableModel.addTournamentGames(tournamentGames);
+  }
+
   private TournamentDataPanel initTournamentDataPanel() {
     Map<TournamentListeners, EventListener> tournamentDataPanelListeners = new HashMap<TournamentListeners, EventListener>();
     tournamentDataPanelListeners.put(TournamentListeners.TEAM_EDIT,
@@ -194,6 +267,8 @@ public class TournamentController {
         new TournamentGameRemoveAction());
     tournamentGamesPanelListeners.put(TournamentListeners.GAME_RESULTS,
         new GameResultsAction());
+    tournamentGamesPanelListeners.put(TournamentListeners.GAME_IMPORT,
+        new TournamentGamesImportAction());
 
     List<TournamentGame> tournamentGames = m_dbConnection
         .getTournamentGames(m_tournament.getId());
@@ -1582,6 +1657,35 @@ public class TournamentController {
         } catch (Throwable t) {
           ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
+      }
+    }
+  }
+
+  @SuppressWarnings("serial")
+  class TournamentGamesImportAction extends AbstractAction {
+    public TournamentGamesImportAction() {
+      putValue(Action.NAME, "Import tournament games");
+    }
+
+    public void actionPerformed(ActionEvent event) {
+      try {
+        if (m_tournamentGamesTableModel.getRowCount() != 0) {
+          ErrorHandler
+              .userErr("Games can only be imported to an empty tournament");
+          return;
+        }
+        JFileChooser choice = new JFileChooser();
+        int option = choice.showOpenDialog(m_tournamentPanel);
+
+        File file;
+        if (option == JFileChooser.APPROVE_OPTION) {
+          file = choice.getSelectedFile();
+          importTournamentGames(file, m_tournament.getId());
+        }
+
+
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
     }
   }

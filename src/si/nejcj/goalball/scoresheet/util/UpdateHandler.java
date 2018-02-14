@@ -68,7 +68,7 @@ public class UpdateHandler extends DefaultHandler {
       String teamCountry = attributes.getValue(ATTRIBUTE_TEAM_COUNTRY);
       boolean nationalTeam = Boolean.parseBoolean(attributes
           .getValue(ATTRIBUTE_NATIONAL_TEAM));
-      team = new Team(null, teamName, teamCountry, nationalTeam);
+      team = new Team(null, teamName, teamCountry, nationalTeam, true);
       teamStaff = new ArrayList<Staff>();
       teamPlayers = new ArrayList<Player>();
     } else if (qName.equals(ELEMENT_STAFF)) {

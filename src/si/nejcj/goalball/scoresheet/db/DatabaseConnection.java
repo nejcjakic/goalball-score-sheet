@@ -43,7 +43,7 @@ import si.nejcj.goalball.scoresheet.util.IntegerListHandler;
 public class DatabaseConnection {
 
   // CORRECT THIS FIELD EVERYTIME THERE IS A CHANGE TO DATABASE STRUCTURE
-  private static final int DATABASE_VERSION = 4;
+  private static final int DATABASE_VERSION = 5;
 
   private Connection m_connection;
   private Statement m_statement = null;
@@ -360,6 +360,16 @@ public class DatabaseConnection {
             JOptionPane.ERROR_MESSAGE);
       }
       break;
+    case 4:
+      try {
+        // Add gender to team data - 0-male, 1-female
+        String query = "ALTER TABLE team ADD COLUMN is_male boolean default true";
+        m_statement.executeUpdate(query);
+      } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, e.getMessage(),
+            "SQLException! method: alterTables(), case 4",
+            JOptionPane.ERROR_MESSAGE);
+      }
     // WHEN ADDING ANY MORE CASES BE SURE TO CORRECT THE VALUE OF
     // DATABASE VERSION TO A HIGHER NUMBER (ONE HIGHER THAN THE LAST CASE)!!!!
     default:
@@ -845,7 +855,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public List<TournamentTeam> getTournamentTeams(Integer tournamentId) {
-    String query = "SELECT tt.id as id, t.national_team as nationalteam, t.team_name as teamname, t.country as country FROM team t, tournament_team tt WHERE tt.tournament_id = ? AND tt.team_id = t.id";
+    String query = "SELECT tt.id as id, t.national_team as nationalteam, t.team_name as teamname, t.country as country, t.is_male as male FROM team t, tournament_team tt WHERE tt.tournament_id = ? AND tt.team_id = t.id";
     try {
       return queryRunner.query(query,
           new BeanListHandler<TournamentTeam>(TournamentTeam.class),
@@ -889,7 +899,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public TournamentTeam getTournamentTeamById(Integer tournamentTeamId) {
-    String query = "SELECT tt.id, t.national_team as nationalteam, t.team_name as teamname, t.country FROM team t, tournament_team tt WHERE t.id = tt.team_id AND tt.id = ?";
+    String query = "SELECT tt.id, t.national_team as nationalteam, t.team_name as teamname, t.country, t.is_male as male FROM team t, tournament_team tt WHERE t.id = tt.team_id AND tt.id = ?";
     try {
       return queryRunner.query(query,
           new BeanHandler<TournamentTeam>(TournamentTeam.class),
@@ -1547,11 +1557,11 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public int insertTeam(Team team) {
-    String query = "INSERT INTO team(team_name, country, national_team, admin_data) values (?, ?, ?, ?)";
+    String query = "INSERT INTO team(team_name, country, national_team, admin_data, is_male) values (?, ?, ?, ?, ?)";
 
     try {
       queryRunner.update(query, team.getTeamName(), team.getCountry(),
-          team.isNationalTeam(), team.isAdminData());
+          team.isNationalTeam(), team.isAdminData(), team.isMale());
       return getMaxId("team");
     } catch (SQLException e) {
       throw new InternalTechnicalException(

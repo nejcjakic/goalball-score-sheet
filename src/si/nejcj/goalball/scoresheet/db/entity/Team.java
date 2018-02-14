@@ -4,11 +4,12 @@ public class Team extends BasicEntity<Team> implements Comparable<Team> {
   protected String teamName;
   protected String country;
   protected boolean nationalTeam;
+  protected boolean male;
 
   public Team() {
   }
 
-  public Team(Integer id, String teamName, String country, boolean nationalTeam) {
+  public Team(Integer id, String teamName, String country, boolean nationalTeam, boolean isMale) {
     this.id = id;
     this.teamName = teamName;
     this.country = country;
@@ -38,12 +39,21 @@ public class Team extends BasicEntity<Team> implements Comparable<Team> {
   public void setNationalTeam(boolean nationalTeam) {
     this.nationalTeam = nationalTeam;
   }
+  
+  public boolean isMale() {
+    return male;
+  }
+
+  public void setMale(boolean isMale) {
+    this.male = isMale;
+  }
 
   @Override
   public int hashCode() {
     final int prime = 31;
-    int result = 1;
+    int result = super.hashCode();
     result = prime * result + ((country == null) ? 0 : country.hashCode());
+    result = prime * result + (male ? 1231 : 1237);
     result = prime * result + ((teamName == null) ? 0 : teamName.hashCode());
     return result;
   }
@@ -53,7 +63,7 @@ public class Team extends BasicEntity<Team> implements Comparable<Team> {
     if (this == obj) {
       return true;
     }
-    if (obj == null) {
+    if (!super.equals(obj)) {
       return false;
     }
     if (!(obj instanceof Team)) {
@@ -65,6 +75,9 @@ public class Team extends BasicEntity<Team> implements Comparable<Team> {
         return false;
       }
     } else if (!country.equals(other.country)) {
+      return false;
+    }
+    if (male != other.male) {
       return false;
     }
     if (teamName == null) {
