@@ -13,8 +13,9 @@ public class TournamentTeamsTableModel extends AbstractTableModel {
   // indices of items as located in the table.
   public final static int COLUMN_IDX_TEAM_COUNTRY = 0;
   public final static int COLUMN_IDX_TEAM_NAME = 1;
+  public final static int COLUMN_IDX_TEAM_GENDER = 2;
 
-  private final String columnNames[] = { "Country", "Name" };
+  private final String columnNames[] = { "Country", "Name", "Gender" };
 
   private List<Team> teams;
 
@@ -56,6 +57,8 @@ public class TournamentTeamsTableModel extends AbstractTableModel {
       return team.getCountry();
     case COLUMN_IDX_TEAM_NAME:
       return team.getTeamName();
+    case COLUMN_IDX_TEAM_GENDER:
+      return team.isMale() ? "Male" : "Female";
     default:
       return null;
     }
@@ -71,6 +74,9 @@ public class TournamentTeamsTableModel extends AbstractTableModel {
     case COLUMN_IDX_TEAM_NAME:
       team.setTeamName(value.toString());
       break;
+    case COLUMN_IDX_TEAM_GENDER:
+      boolean isMale = "Male".equals(value.toString());
+      team.setMale(isMale);
     default:
       break;
     }

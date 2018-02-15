@@ -414,7 +414,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public List<Team> getAllTeams() {
-    String query = "SELECT id, country, team_name as teamname, national_team as nationalteam FROM team";
+    String query = "SELECT id, country, team_name as teamname, national_team as nationalteam, is_male as male FROM team";
     try {
       return queryRunner.query(query, new BeanListHandler<Team>(Team.class));
     } catch (SQLException e) {
@@ -434,7 +434,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public List<Team> getTeams(boolean nationalTeam) {
-    String query = "SELECT id, team_name as teamname, country, national_team as nationalteam FROM team WHERE national_team = ?";
+    String query = "SELECT id, team_name as teamname, country, national_team as nationalteam, is_male as male FROM team WHERE national_team = ?";
     try {
       return queryRunner.query(query, new BeanListHandler<Team>(Team.class),
           nationalTeam);
@@ -702,7 +702,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public Team getTeamByNameAndCountry(String teamName, String country) {
-    String query = "SELECT id, national_team as nationalteam, team_name as teamname, country FROM team WHERE team_name = ? AND country = ?";
+    String query = "SELECT id, national_team as nationalteam, team_name as teamname, country, is_male as male FROM team WHERE team_name = ? AND country = ?";
 
     try {
       return queryRunner.query(query, new BeanHandler<Team>(Team.class),
@@ -723,7 +723,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public Team getTeamById(Integer teamId) {
-    String query = "SELECT id, national_team as nationalteam, team_name as teamname, country FROM team WHERE id = ?";
+    String query = "SELECT id, national_team as nationalteam, team_name as teamname, country, is_male as male FROM team WHERE id = ?";
 
     try {
       return queryRunner.query(query, new BeanHandler<Team>(Team.class),
@@ -805,7 +805,7 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public List<Team> getParticipatingTeams(Integer tournamentId) {
-    String query = "SELECT t.id as id, t.national_team as nationalteam, t.team_name as teamname, t.country as country FROM team t, tournament_team tt WHERE tt.tournament_id = ? AND tt.team_id = t.id";
+    String query = "SELECT t.id as id, t.national_team as nationalteam, t.team_name as teamname, t.country as country, t.is_male as male FROM team t, tournament_team tt WHERE tt.tournament_id = ? AND tt.team_id = t.id";
     try {
       return queryRunner.query(query, new BeanListHandler<Team>(Team.class),
           tournamentId);

@@ -9,11 +9,12 @@ public class Team extends BasicEntity<Team> implements Comparable<Team> {
   public Team() {
   }
 
-  public Team(Integer id, String teamName, String country, boolean nationalTeam, boolean isMale) {
+  public Team(Integer id, String teamName, String country, boolean nationalTeam, boolean male) {
     this.id = id;
     this.teamName = teamName;
     this.country = country;
     this.nationalTeam = nationalTeam;
+    this.male = male;
   }
 
   public String getTeamName() {
