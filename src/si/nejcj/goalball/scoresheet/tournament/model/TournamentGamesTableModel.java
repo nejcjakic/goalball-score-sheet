@@ -15,14 +15,15 @@ public class TournamentGamesTableModel extends AbstractTableModel {
   public final static int COLUMN_IDX_GAME_NO = 0;
   public final static int COLUMN_IDX_TEAM_A_NAME = 1;
   public final static int COLUMN_IDX_TEAM_B_NAME = 2;
-  public final static int COLUMN_IDX_DATE = 3;
-  public final static int COLUMN_IDX_TIME = 4;
-  public final static int COLUMN_IDX_REFEREE_1_NAME = 5;
-  public final static int COLUMN_IDX_REFEREE_2_NAME = 6;
-  public final static int COLUMN_IDX_GAME_SCORE = 7;
+  public final static int COLUMN_IDX_TEAM_GENDER = 3;
+  public final static int COLUMN_IDX_DATE = 4;
+  public final static int COLUMN_IDX_TIME = 5;
+  public final static int COLUMN_IDX_REFEREE_1_NAME = 6;
+  public final static int COLUMN_IDX_REFEREE_2_NAME = 7;
+  public final static int COLUMN_IDX_GAME_SCORE = 8;
 
-  protected String columnNames[] = { "Game no", "Team A", "Team B", "Date",
-      "Time", "Referee 1", "Referee 2", "Game score" };
+  protected String columnNames[] = { "Game no", "Team A", "Team B", "Gender",
+      "Date", "Time", "Referee 1", "Referee 2", "Game score" };
 
   private List<TournamentGame> allGames;
 
@@ -69,6 +70,8 @@ public class TournamentGamesTableModel extends AbstractTableModel {
       return game.getTeamA().getDisplayName();
     case COLUMN_IDX_TEAM_B_NAME:
       return game.getTeamB().getDisplayName();
+    case COLUMN_IDX_TEAM_GENDER:
+      return game.getGender();
     case COLUMN_IDX_DATE:
       if (game.getGameDate() != null) {
         return Constants.DEFAULT_DATE_FORMAT.format(game.getGameDate());
@@ -95,7 +98,7 @@ public class TournamentGamesTableModel extends AbstractTableModel {
     Collections.sort(allGames);
     fireTableRowsInserted(getRowCount() - 1, getRowCount() - 1);
   }
-  
+
   public void addTournamentGames(List<TournamentGame> tournamentGames) {
     allGames.addAll(tournamentGames);
     Collections.sort(allGames);
