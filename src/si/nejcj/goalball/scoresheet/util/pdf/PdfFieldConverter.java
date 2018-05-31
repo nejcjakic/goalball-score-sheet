@@ -3,9 +3,11 @@ package si.nejcj.goalball.scoresheet.util.pdf;
 import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.*;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import si.nejcj.goalball.scoresheet.db.entity.TournamentGame;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentPlayer;
@@ -126,6 +128,7 @@ public class PdfFieldConverter {
     }
     loopCount = 1;
 
+    Collections.sort(teamAStaff);
     for (TournamentStaff staff : teamAStaff) {
       if (loopCount == 1) {
         gameInformationMap.put(FIELD_TEAM_A_STAFF_1_LAST_NAME,
@@ -197,6 +200,7 @@ public class PdfFieldConverter {
     }
     loopCount = 1;
 
+    Collections.sort(teamBStaff);
     for (TournamentStaff staff : teamBStaff) {
       if (loopCount == 1) {
         gameInformationMap.put(FIELD_TEAM_B_STAFF_1_LAST_NAME,
@@ -264,6 +268,7 @@ public class PdfFieldConverter {
     }
     loopCount = 1;
 
+    Collections.sort(teamStaff);
     for (TournamentStaff staff : teamStaff) {
       if (loopCount == 1) {
         dataMap.put(FIELD_TEAM_A_STAFF_1_LAST_NAME, staff.getLastName());

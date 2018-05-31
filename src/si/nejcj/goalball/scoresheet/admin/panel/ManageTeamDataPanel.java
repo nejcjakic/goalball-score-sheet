@@ -74,53 +74,35 @@ public class ManageTeamDataPanel extends JPanel {
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     GroupLayout groupLayout = new GroupLayout(this);
-    groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(
-        Alignment.LEADING).addGroup(
-        groupLayout
-            .createSequentialGroup()
-            .addContainerGap()
-            .addGroup(
-                groupLayout
-                    .createParallelGroup(Alignment.LEADING)
-                    .addGroup(
-                        groupLayout
-                            .createSequentialGroup()
-                            .addComponent(teamNameLBL)
-                            .addGap(18)
-                            .addComponent(selectionCB,
-                                GroupLayout.PREFERRED_SIZE, 150,
-                                GroupLayout.PREFERRED_SIZE)
-                            .addGap(18)
-                            .addComponent(addTeamBtn,
-                                GroupLayout.PREFERRED_SIZE, 93,
-                                GroupLayout.PREFERRED_SIZE))
-                    .addComponent(staffLBL)
-                    .addComponent(playersLBL)
+    groupLayout
+        .setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+            .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                    .addGroup(groupLayout.createSequentialGroup()
+                        .addComponent(teamNameLBL).addGap(18)
+                        .addComponent(selectionCB, GroupLayout.PREFERRED_SIZE,
+                            150, GroupLayout.PREFERRED_SIZE)
+                        .addGap(18).addComponent(addTeamBtn,
+                            GroupLayout.PREFERRED_SIZE, 93,
+                            GroupLayout.PREFERRED_SIZE))
+                    .addComponent(staffLBL).addComponent(playersLBL)
                     .addComponent(playersSP, GroupLayout.DEFAULT_SIZE, 380,
                         Short.MAX_VALUE)
                     .addComponent(staffSP, 0, 0, Short.MAX_VALUE))
-            .addGap(18)
-            .addGroup(
-                groupLayout.createParallelGroup(Alignment.LEADING)
+                .addGap(18)
+                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                     .addComponent(addStaffBtn).addComponent(deleteStaffBtn)
                     .addComponent(addPlayerBtn).addComponent(deletePlayerBtn))
-            .addContainerGap(109, Short.MAX_VALUE)));
-    groupLayout.setVerticalGroup(groupLayout
-        .createParallelGroup(Alignment.LEADING)
-        .addGroup(
-            groupLayout
-                .createSequentialGroup()
-                .addContainerGap()
-                .addGroup(
-                    groupLayout
-                        .createParallelGroup(Alignment.BASELINE)
-                        .addComponent(teamNameLBL)
-                        .addComponent(selectionCB, GroupLayout.PREFERRED_SIZE,
-                            GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE)
-                        .addComponent(addTeamBtn))
-                .addGap(13)
-                .addComponent(staffLBL)
+                .addContainerGap(109, Short.MAX_VALUE)));
+    groupLayout
+        .setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+            .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                    .addComponent(teamNameLBL)
+                    .addComponent(selectionCB, GroupLayout.PREFERRED_SIZE,
+                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addTeamBtn))
+                .addGap(13).addComponent(staffLBL)
                 .addPreferredGap(ComponentPlacement.UNRELATED)
                 .addComponent(staffSP, GroupLayout.PREFERRED_SIZE, 198,
                     GroupLayout.PREFERRED_SIZE)
@@ -129,9 +111,9 @@ public class ManageTeamDataPanel extends JPanel {
                 .addComponent(playersLBL)
                 .addPreferredGap(ComponentPlacement.UNRELATED)
                 .addComponent(playersSP, GroupLayout.PREFERRED_SIZE, 198,
-                    GroupLayout.PREFERRED_SIZE).addGap(76))
-        .addGroup(
-            groupLayout.createSequentialGroup().addGap(82)
+                    GroupLayout.PREFERRED_SIZE)
+                .addGap(76))
+            .addGroup(groupLayout.createSequentialGroup().addGap(82)
                 .addComponent(addStaffBtn)
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .addComponent(deleteStaffBtn).addGap(256)
@@ -195,9 +177,10 @@ public class ManageTeamDataPanel extends JPanel {
       if (value instanceof Team) {
         Team team = (Team) value;
         if (team.isNationalTeam()) {
-          setText(team.getCountry());
+          setText(
+              team.getCountry() + " / " + (team.isMale() ? "male" : "female"));
         } else {
-          setText(team.getTeamName() + " / " + team.getCountry());
+          setText(team.getTeamName() + " / " + team.getCountry()+ (team.isMale() ? "male" : "female"));
         }
         return this;
       }
@@ -206,14 +189,16 @@ public class ManageTeamDataPanel extends JPanel {
     }
   }
 
-  public void setStaffTableModel(TableModel model, TableModelListener listener) {
+  public void setStaffTableModel(TableModel model,
+      TableModelListener listener) {
     staffTBL.setModel(model);
     RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(model);
     staffTBL.setRowSorter(sorter);
     staffTBL.getModel().addTableModelListener(listener);
   }
 
-  public void setPlayersTableModel(TableModel model, TableModelListener listener) {
+  public void setPlayersTableModel(TableModel model,
+      TableModelListener listener) {
     playersTBL.setModel(model);
     RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(model);
     playersTBL.setRowSorter(sorter);

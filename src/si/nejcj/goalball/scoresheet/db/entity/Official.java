@@ -1,7 +1,7 @@
 package si.nejcj.goalball.scoresheet.db.entity;
 
-public class Official extends BasicEntity<Official> implements
-    Comparable<Official> {
+public class Official extends BasicEntity<Official>
+    implements Comparable<Official> {
   protected String lastName;
   protected String firstName;
   protected String gender;
@@ -66,6 +66,10 @@ public class Official extends BasicEntity<Official> implements
 
   public String getFullName() {
     return lastName + " " + firstName;
+  }
+
+  public String getDisplayName() {
+    return lastName + " " + firstName.substring(0, 1);
   }
 
   @Override
