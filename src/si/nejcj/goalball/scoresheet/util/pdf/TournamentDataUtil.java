@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import si.nejcj.goalball.scoresheet.db.entity.Team;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentGame;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentPlayer;
+import si.nejcj.goalball.scoresheet.db.entity.TournamentTeam;
 import si.nejcj.goalball.scoresheet.db.entity.util.GameResult;
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
 
@@ -41,6 +43,75 @@ public class TournamentDataUtil extends PdfUtil {
 
   static final Font TEAM_DISPLAY_NAME_FONT = FontFactory
       .getFont(FontFactory.TIMES, 120, Font.BOLD, BaseColor.BLACK);
+
+  public static void createTeamStatistics(File file,
+      final List<TournamentGame> tournamentGames) {
+    Map<TournamentTeam, List<TournamentGame>> teamGames = new HashMap<>();
+    for (TournamentGame game : tournamentGames) {
+      teamGames.putIfAbsent(game.getTeamA(), new ArrayList<>());
+      teamGames.putIfAbsent(game.getTeamB(), new ArrayList<>());
+
+      teamGames.get(game.getTeamA()).add(game);
+      teamGames.get(game.getTeamB()).add(game);
+    }
+
+    List<TournamentTeam> sortedKeys = new ArrayList<>(teamGames.keySet());
+    Collections.sort(sortedKeys, new Comparator<TournamentTeam>() {
+
+      @Override
+      public int compare(TournamentTeam team1, TournamentTeam team2) {
+        String genderSorter1 = team1.isMale() ? "a" : "b";
+        String genderSorter2 = team2.isMale() ? "a" : "b";
+
+        return genderSorter1.concat(team1.getSimpleName())
+            .compareTo(genderSorter2.concat(team2.getSimpleName()));
+      }
+    });
+    for (TournamentTeam key : sortedKeys) {
+      printTeamStatistics(key, teamGames.get(key));
+    }
+
+    // Map<TournamentTeam, List<TournamentGame>> gamesByTeam = tournamentGames
+    // .stream().collect(
+    // Collectors.groupingBy(TournamentGame::getTeamA,
+    // Collectors.groupingBy(TournamentGame::getTeamB)));
+
+    // Collectors.groupingBy(TournamentGame::getTeamA,
+    // Collectors.groupingBy(TournamentGame::getTeamB)));
+  }
+
+  private static void printTeamStatistics(TournamentTeam team,
+      List<TournamentGame> games) {
+    int totalGames = games.size();
+    long homeGames = games.stream().filter(g -> g.getTeamA().equals(team))
+        .count();
+    long awayGames = games.stream().filter(g -> g.getTeamB().equals(team))
+        .count();
+    long hall1Games = games.stream().filter(g -> g.getVenue().equals("Hall 1"))
+        .count();
+    long hall2Games = games.stream().filter(g -> g.getVenue().equals("Hall 2"))
+        .count();
+
+    String gender = team.isMale() ? "Male" : "Female";
+    System.out.println(
+        "=========" + team.getSimpleName() + " " + gender + "=========");
+    System.out.println();
+    System.out.println("Games: " + totalGames);
+    for (TournamentGame game : games) {
+      System.out.println(game.getGameDate() + " " + game.getGameTime());
+    }
+    System.out.println();
+    System.out.println(String.format("Home games: '%s', Away games: '%s'",
+        homeGames, awayGames));
+    System.out.println(
+        String.format("Hall1: '%s', Hall2: '%s'", hall1Games, hall2Games));
+    System.out.println();
+    System.out.println();
+
+    // TournamentTeam tournamentTeamA = tournamentTeams.stream().filter(
+    // t -> t.getSimpleName().equals(homeTeam) && t.isMale() == isMaleGame)
+    // .findFirst().get();
+  }
 
   public static void createGamesSchedule(File file,
       final List<TournamentGame> tournamentGames, String venue) {
@@ -419,7 +490,8 @@ public class TournamentDataUtil extends PdfUtil {
     for (String key : keySet) {
       switch (type) {
       case FINAL:
-        if (key.toUpperCase().equals("FINAL")) {
+        if (key.toUpperCase().equals("FINAL")
+            || key.toUpperCase().equals("1ST")) {
           return key;
         }
         break;

@@ -40,6 +40,7 @@ import si.nejcj.goalball.scoresheet.exception.business.InternalIntegrityConstrai
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
 import si.nejcj.goalball.scoresheet.util.Constants.ManageTeamDataActions;
 import si.nejcj.goalball.scoresheet.util.ErrorHandler;
+import si.nejcj.goalball.scoresheet.util.SwingAction;
 
 public class AdminController {
 
@@ -82,13 +83,13 @@ public class AdminController {
     manageTeamDataPanelActions.put(ManageTeamDataActions.ADD_TEAM_ACTION,
         new AddTeamAction());
     manageTeamDataPanelActions.put(ManageTeamDataActions.ADD_STAFF_ACTION,
-        new AddStaffAction());
+        SwingAction.of("Add staff member", e -> addStaff()));
     manageTeamDataPanelActions.put(ManageTeamDataActions.REMOVE_STAFF_ACTION,
-        new RemoveStaffAction());
+        SwingAction.of("Delete staff member", e -> removeStaff()));
     manageTeamDataPanelActions.put(ManageTeamDataActions.ADD_PLAYER_ACTION,
-        new AddPlayerAction());
+        SwingAction.of("Add player", e -> addPlayer()));
     manageTeamDataPanelActions.put(ManageTeamDataActions.REMOVE_PLAYER_ACTION,
-        new RemovePlayerAction());
+        SwingAction.of("Delete player", e -> deletePlayer()));
     manageTeamDataPanel = new ManageTeamDataPanel(manageTeamDataPanelActions);
     manageTeamDataPanel.init(teamNamesModel, new TeamSelectionListener());
 
@@ -101,10 +102,10 @@ public class AdminController {
     List<OfficialLevel> officialLevels = m_dbConnection.getAllOfficialLevels();
     officialLevelsComboBoxModel = new OfficialLevelsComboBoxModel(
         officialLevels);
-    manageOfficialsDataPanel = new ManageOfficialsDataPanel(
-        officialsTableModel, officialLevelsComboBoxModel,
-        new OfficialsTableModelListener(), new AddOfficialAction(),
-        new DeleteOfficialAction());
+    manageOfficialsDataPanel = new ManageOfficialsDataPanel(officialsTableModel,
+        officialLevelsComboBoxModel, new OfficialsTableModelListener(),
+        SwingAction.of("Add official", e -> addOfficial()),
+        SwingAction.of("Delete official", e -> deleteOfficial()));
     return manageOfficialsDataPanel;
   }
 
@@ -120,16 +121,14 @@ public class AdminController {
         if (selectedItem instanceof Team) {
           Team selectedTeam = (Team) selectedItem;
           try {
-            staffMembersTableModel = new StaffMembersTableModel(
-                m_dbConnection.getStaffByTeamId(selectedTeam.getId(),
-                    Staff.class));
+            staffMembersTableModel = new StaffMembersTableModel(m_dbConnection
+                .getStaffByTeamId(selectedTeam.getId(), Staff.class));
             manageTeamDataPanel.setStaffTableModel(staffMembersTableModel,
                 new StaffTableModelListener());
             staffMembersTableModel.fireTableDataChanged();
 
-            playersTableModel = new PlayersTableModel(
-                m_dbConnection.getPlayersByTeamId(selectedTeam.getId(),
-                    Player.class));
+            playersTableModel = new PlayersTableModel(m_dbConnection
+                .getPlayersByTeamId(selectedTeam.getId(), Player.class));
             manageTeamDataPanel.setPlayersTableModel(playersTableModel,
                 new PlayersTableModelListener());
             playersTableModel.fireTableDataChanged();
@@ -169,61 +168,45 @@ public class AdminController {
     }
   }
 
-  @SuppressWarnings("serial")
-  class AddOfficialAction extends AbstractAction {
-    public AddOfficialAction() {
-      super("Add official");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      Official official = new Official();
-      try {
-        int officialId = m_dbConnection.insertOfficial(official);
-        official.setId(officialId);
-        officialsTableModel.addOfficial(official);
-      } catch (InternalTechnicalException ex) {
-        ErrorHandler.sysErr("Problem adding official to database",
-            ex.getMessage(), ex);
-      } catch (Throwable t) {
-        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-      }
+  private void addOfficial() {
+    Official official = new Official();
+    try {
+      int officialId = m_dbConnection.insertOfficial(official);
+      official.setId(officialId);
+      officialsTableModel.addOfficial(official);
+    } catch (InternalTechnicalException ex) {
+      ErrorHandler.sysErr("Problem adding official to database",
+          ex.getMessage(), ex);
+    } catch (Throwable t) {
+      ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
     }
   }
 
-  @SuppressWarnings("serial")
-  class DeleteOfficialAction extends AbstractAction {
-    public DeleteOfficialAction() {
-      super("Delete official");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      int row = manageOfficialsDataPanel.getSelectedRow();
-      if (row != -1) {
-        Official official = officialsTableModel.getOfficial(row);
-        int selection = JOptionPane.showConfirmDialog(manageOfficialsDataPanel,
-            "Are you sure you want to delete the selected official?",
-            "Delete official", JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
-        if (selection == JOptionPane.YES_OPTION) {
-          try {
-            m_dbConnection.deleteOfficialById(official.getId());
-            officialsTableModel.removeOfficial(official, row);
-          } catch (InternalIntegrityConstraintException ex) {
-            ErrorHandler.userWrn(ex.getMessage());
-          } catch (InternalTechnicalException ex) {
-            ErrorHandler.sysErr("Problem deleting official from database",
-                ex.getMessage(), ex);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
+  private void deleteOfficial() {
+    int row = manageOfficialsDataPanel.getSelectedRow();
+    if (row != -1) {
+      Official official = officialsTableModel.getOfficial(row);
+      int selection = JOptionPane.showConfirmDialog(manageOfficialsDataPanel,
+          "Are you sure you want to delete the selected official?",
+          "Delete official", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE);
+      if (selection == JOptionPane.YES_OPTION) {
+        try {
+          m_dbConnection.deleteOfficialById(official.getId());
+          officialsTableModel.removeOfficial(official, row);
+        } catch (InternalIntegrityConstraintException ex) {
+          ErrorHandler.userWrn(ex.getMessage());
+        } catch (InternalTechnicalException ex) {
+          ErrorHandler.sysErr("Problem deleting official from database",
+              ex.getMessage(), ex);
+        } catch (Throwable t) {
+          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
-      } else {
-        JOptionPane.showMessageDialog(manageOfficialsDataPanel,
-            "Please select an official", "No row selected",
-            JOptionPane.WARNING_MESSAGE);
       }
+    } else {
+      JOptionPane.showMessageDialog(manageOfficialsDataPanel,
+          "Please select an official", "No row selected",
+          JOptionPane.WARNING_MESSAGE);
     }
   }
 
@@ -319,63 +302,46 @@ public class AdminController {
     }
   }
 
-  @SuppressWarnings("serial")
-  class AddStaffAction extends AbstractAction {
-
-    public AddStaffAction() {
-      super("Add staff member");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      Staff staffMember = new Staff();
-      try {
-        int staffId = m_dbConnection.insertStaffMember(staffMember,
-            ((Team) teamNamesModel.getSelectedItem()).getId());
-        staffMember.setId(staffId);
-        staffMembersTableModel.addStaffMember(staffMember);
-      } catch (InternalTechnicalException ex) {
-        ErrorHandler.sysErr("Problem adding staff member to database",
-            ex.getMessage(), ex);
-      } catch (Throwable t) {
-        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-      }
+  private void addStaff() {
+    Staff staffMember = new Staff();
+    try {
+      int staffId = m_dbConnection.insertStaffMember(staffMember,
+          ((Team) teamNamesModel.getSelectedItem()).getId());
+      staffMember.setId(staffId);
+      staffMembersTableModel.addStaffMember(staffMember);
+    } catch (InternalTechnicalException ex) {
+      ErrorHandler.sysErr("Problem adding staff member to database",
+          ex.getMessage(), ex);
+    } catch (Throwable t) {
+      ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
     }
   }
 
-  @SuppressWarnings("serial")
-  class RemoveStaffAction extends AbstractAction {
-    public RemoveStaffAction() {
-      super("Delete staff member");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      int row = manageTeamDataPanel.getSelectedStaffRow();
-      if (row != -1) {
-        Staff staffMember = staffMembersTableModel.getStaffMember(row);
-        int selection = JOptionPane.showConfirmDialog(manageTeamDataPanel,
-            "Are you sure you want to delete the selected staff member?",
-            "Delete staff member", JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
-        if (selection == JOptionPane.YES_OPTION) {
-          try {
-            m_dbConnection.deleteStaffMemberById(staffMember.getId());
-            staffMembersTableModel.removeStaffMember(staffMember, row);
-          } catch (InternalIntegrityConstraintException ex) {
-            ErrorHandler.userWrn(ex.getMessage());
-          } catch (InternalTechnicalException ex) {
-            ErrorHandler.sysErr("Problem deleting staff member from database",
-                ex.getMessage(), ex);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
+  public void removeStaff() {
+    int row = manageTeamDataPanel.getSelectedStaffRow();
+    if (row != -1) {
+      Staff staffMember = staffMembersTableModel.getStaffMember(row);
+      int selection = JOptionPane.showConfirmDialog(manageTeamDataPanel,
+          "Are you sure you want to delete the selected staff member?",
+          "Delete staff member", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE);
+      if (selection == JOptionPane.YES_OPTION) {
+        try {
+          m_dbConnection.deleteStaffMemberById(staffMember.getId());
+          staffMembersTableModel.removeStaffMember(staffMember, row);
+        } catch (InternalIntegrityConstraintException ex) {
+          ErrorHandler.userWrn(ex.getMessage());
+        } catch (InternalTechnicalException ex) {
+          ErrorHandler.sysErr("Problem deleting staff member from database",
+              ex.getMessage(), ex);
+        } catch (Throwable t) {
+          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
-      } else {
-        JOptionPane.showMessageDialog(manageTeamDataPanel,
-            "Please select a staff member", "No row selected",
-            JOptionPane.WARNING_MESSAGE);
       }
+    } else {
+      JOptionPane.showMessageDialog(manageTeamDataPanel,
+          "Please select a staff member", "No row selected",
+          JOptionPane.WARNING_MESSAGE);
     }
   }
 
@@ -404,62 +370,46 @@ public class AdminController {
     }
   }
 
-  @SuppressWarnings("serial")
-  class AddPlayerAction extends AbstractAction {
-    public AddPlayerAction() {
-      super("Add player");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      Player player = new Player();
-      try {
-        int playerId = m_dbConnection.insertPlayer(player,
-            ((Team) teamNamesModel.getSelectedItem()).getId());
-        player.setId(playerId);
-        playersTableModel.addPlayer(player);
-      } catch (InternalTechnicalException ex) {
-        ErrorHandler.sysErr("Problem adding player to database",
-            ex.getMessage(), ex);
-      } catch (Throwable t) {
-        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-      }
+  public void addPlayer() {
+    Player player = new Player();
+    try {
+      int playerId = m_dbConnection.insertPlayer(player,
+          ((Team) teamNamesModel.getSelectedItem()).getId());
+      player.setId(playerId);
+      playersTableModel.addPlayer(player);
+    } catch (InternalTechnicalException ex) {
+      ErrorHandler.sysErr("Problem adding player to database", ex.getMessage(),
+          ex);
+    } catch (Throwable t) {
+      ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
     }
   }
 
-  @SuppressWarnings("serial")
-  class RemovePlayerAction extends AbstractAction {
-    public RemovePlayerAction() {
-      super("Delete player");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      int row = manageTeamDataPanel.getSelectedPlayerRow();
-      if (row != -1) {
-        Player player = playersTableModel.getPlayer(row);
-        int selection = JOptionPane.showConfirmDialog(manageTeamDataPanel,
-            "Are you sure you want to delete the selected player?",
-            "Delete player", JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
-        if (selection == JOptionPane.YES_OPTION) {
-          try {
-            m_dbConnection.deletePlayerById(player.getId());
-            playersTableModel.removePlayer(player, row);
-          } catch (InternalIntegrityConstraintException ex) {
-            ErrorHandler.userWrn(ex.getMessage());
-          } catch (InternalTechnicalException ex) {
-            ErrorHandler.sysErr("Problem deleting player from database",
-                ex.getMessage(), ex);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
+  public void deletePlayer() {
+    int row = manageTeamDataPanel.getSelectedPlayerRow();
+    if (row != -1) {
+      Player player = playersTableModel.getPlayer(row);
+      int selection = JOptionPane.showConfirmDialog(manageTeamDataPanel,
+          "Are you sure you want to delete the selected player?",
+          "Delete player", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE);
+      if (selection == JOptionPane.YES_OPTION) {
+        try {
+          m_dbConnection.deletePlayerById(player.getId());
+          playersTableModel.removePlayer(player, row);
+        } catch (InternalIntegrityConstraintException ex) {
+          ErrorHandler.userWrn(ex.getMessage());
+        } catch (InternalTechnicalException ex) {
+          ErrorHandler.sysErr("Problem deleting player from database",
+              ex.getMessage(), ex);
+        } catch (Throwable t) {
+          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
-      } else {
-        JOptionPane.showMessageDialog(manageTeamDataPanel,
-            "Please select a player", "No row selected",
-            JOptionPane.WARNING_MESSAGE);
       }
+    } else {
+      JOptionPane.showMessageDialog(manageTeamDataPanel,
+          "Please select a player", "No row selected",
+          JOptionPane.WARNING_MESSAGE);
     }
   }
 }

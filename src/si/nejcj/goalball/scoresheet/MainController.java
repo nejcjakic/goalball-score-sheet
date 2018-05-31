@@ -54,8 +54,11 @@ import si.nejcj.goalball.scoresheet.tournament.panel.SelectTournamentPanel;
 import si.nejcj.goalball.scoresheet.tournament.panel.TournamentPanel;
 import si.nejcj.goalball.scoresheet.util.Constants;
 import si.nejcj.goalball.scoresheet.util.ErrorHandler;
+import si.nejcj.goalball.scoresheet.util.SwingAction;
 import si.nejcj.goalball.scoresheet.util.UpdateHandler;
 import si.nejcj.goalball.scoresheet.util.panel.HtmlPanel;
+import si.nejcj.goalball.scoresheet.util.pdf.TournamentDataUtil;
+import si.nejcj.goalball.scoresheet.util.pdf.TournamentRefereesUtil;
 
 public class MainController {
   // This should be changed in the build.xml file and is changed here
@@ -218,37 +221,59 @@ public class MainController {
     // Referees menu items
     JMenu refereesMenu = new JMenu("Referees");
     JMenuItem refScheduleItem = new JMenuItem(
-        new CreateRefereeScheduleAction());
+        SwingAction.of("Create referee schedule",
+            e -> m_tournamentController.createRefereeSchedule()));
     JMenuItem refereeSheetsItem = new JMenuItem(
-        new CreateRefereeGamesSheetsAction());
+        SwingAction.of("Create referee games sheets",
+            e -> m_tournamentController.createRefereeGamesSheets()));
     JMenuItem refereeStatsItem = new JMenuItem(
-        new CreateRefereeStatsAction());
+        SwingAction.of("Create referee statistics",
+            e -> m_tournamentController.createRefereeStats()));
+    // TODO: This is WC Malmo specific stats
+    JMenuItem createRefStatsAction = new JMenuItem(
+        SwingAction.of("Create ref stats", e -> TournamentRefereesUtil
+            .createRefStats(m_dbConnection.getTournamentGames(7))));
     refereesMenu.add(refScheduleItem);
     refereesMenu.add(refereeSheetsItem);
     refereesMenu.add(refereeStatsItem);
+    refereesMenu.add(createRefStatsAction);
 
     // Games menu items
     JMenu gamesMenu = new JMenu("Games");
-    JMenuItem scoreSheetItem = new JMenuItem(new CreateScoreSheetAction());
+    JMenuItem scoreSheetItem = new JMenuItem(SwingAction.of(
+        "Create score sheet", e -> m_tournamentController.createScoreSheet()));
     JMenuItem allScoreSheetsItem = new JMenuItem(
-        new CreateAllScoreSheetsAction());
-    JMenuItem teamScheduleItem = new JMenuItem(new CreateTeamScheduleAction());
+        SwingAction.of("Create all score sheets",
+            e -> m_tournamentController.createAllScoreSheets()));
+    JMenuItem teamScheduleItem = new JMenuItem(
+        SwingAction.of("Create team schedule",
+            e -> m_tournamentController.createTeamSchedule()));
     JMenuItem teamDisplayNamesItem = new JMenuItem(
-        new CreateTeamDisplayNamesAction());
+        SwingAction.of("Generate team display names",
+            e -> m_tournamentController.createTeamDisplayNames()));
     JMenuItem teamLineUpSheetsItem = new JMenuItem(
-        new CreateLineUpSheetsAction());
+        SwingAction.of("Create team line up sheets",
+            e -> m_tournamentController.createTournamentLineUp()));
+    // TODO: Open dialog to select file and tournament - maybe propagate to
+    // tournament controller?
+    JMenuItem createTeamStatisticsAction = new JMenuItem(
+        SwingAction.of("Create team game statistics", e -> TournamentDataUtil
+            .createTeamStatistics(null, m_dbConnection.getTournamentGames(7))));
     gamesMenu.add(scoreSheetItem);
     gamesMenu.add(allScoreSheetsItem);
     gamesMenu.add(teamScheduleItem);
     gamesMenu.add(teamDisplayNamesItem);
     gamesMenu.add(teamLineUpSheetsItem);
+    gamesMenu.add(createTeamStatisticsAction);
 
     // Results menu
     JMenu resultsMenu = new JMenu("Results");
     JMenuItem resultInputTableItem = new JMenuItem(
-        new CreateResultsInputTable());
+        SwingAction.of("Generate results input table",
+            e -> m_tournamentController.createResultInputTable()));
     JMenuItem tournamentResultsItem = new JMenuItem(
-        new CreateTournamentResultsAction());
+        SwingAction.of("Generate tournament results",
+            e -> m_tournamentController.createTournamentResults()));
     resultsMenu.add(resultInputTableItem);
     resultsMenu.add(tournamentResultsItem);
 
@@ -259,9 +284,15 @@ public class MainController {
 
     // Help menu
     JMenu helpMenu = new JMenu("Help");
-    JMenuItem about = new JMenuItem(new MbHelpAboutAction());
+    JMenuItem about = new JMenuItem(SwingAction.of("About",
+        e -> JOptionPane.showMessageDialog(null,
+            new HtmlPanel("help/about.html", 300, 200), "About",
+            JOptionPane.INFORMATION_MESSAGE)));
     helpMenu.add(about);
-    JMenuItem contents = new JMenuItem(new MbHelpContentsAction());
+    JMenuItem contents = new JMenuItem(SwingAction.of("Contents",
+        e -> JOptionPane.showMessageDialog(null,
+            new HtmlPanel("help/contents.html", 600, 350), "Contents",
+            JOptionPane.INFORMATION_MESSAGE)));
     helpMenu.add(contents);
     menuBar.add(helpMenu);
   }
@@ -428,172 +459,6 @@ public class MainController {
     public void actionPerformed(ActionEvent arg0) {
       saveOnClose();
       System.exit(0);
-    }
-  }
-
-  class CreateLineUpSheetsAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public CreateLineUpSheetsAction() {
-      super("Create team line up sheets");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createTournamentLineUp();
-    }
-  }
-
-  class CreateScoreSheetAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-
-    public CreateScoreSheetAction() {
-      super("Create score sheet");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createScoreSheet();
-    }
-
-  }
-
-  class CreateAllScoreSheetsAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public CreateAllScoreSheetsAction() {
-      super("Create all score sheets");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createAllScoreSheets();
-    }
-  }
-
-  class CreateTeamScheduleAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-
-    public CreateTeamScheduleAction() {
-      super("Create team schedule");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createTeamSchedule();
-    }
-  }
-
-  class CreateRefereeScheduleAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-
-    public CreateRefereeScheduleAction() {
-      super("Create referee schedule");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createRefereeSchedule();
-    }
-  }
-
-  class CreateTeamDisplayNamesAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public CreateTeamDisplayNamesAction() {
-      super("Generate team display names");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createTeamDisplayNames();
-    }
-  }
-
-  class CreateResultsInputTable extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public CreateResultsInputTable() {
-      super("Generate results input table");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createResultInputTable();
-    }
-  }
-
-  class CreateTournamentResultsAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-
-    public CreateTournamentResultsAction() {
-      super("Generate tournament results");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createTournamentResults();
-    }
-  }
-
-  class CreateRefereeStatsAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-
-    public CreateRefereeStatsAction() {
-      super("Create referee statistics");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createRefereeStats();
-    }
-  }
-
-  class CreateRefereeGamesSheetsAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-
-    public CreateRefereeGamesSheetsAction() {
-      super("Create referee games sheets");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      m_tournamentController.createRefereeGamesSheets();
-      ;
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class MbHelpAboutAction extends AbstractAction {
-
-    public MbHelpAboutAction() {
-      super("About");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-      JOptionPane.showMessageDialog(null,
-          new HtmlPanel("help/about.html", 300, 200), "About",
-          JOptionPane.INFORMATION_MESSAGE);
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class MbHelpContentsAction extends AbstractAction {
-    public MbHelpContentsAction() {
-      super("Contents");
-    }
-
-    public void actionPerformed(ActionEvent arg0) {
-      JOptionPane.showMessageDialog(null,
-          new HtmlPanel("help/contents.html", 600, 350), "Contents",
-          JOptionPane.INFORMATION_MESSAGE);
     }
   }
 

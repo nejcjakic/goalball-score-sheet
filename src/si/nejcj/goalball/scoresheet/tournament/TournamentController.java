@@ -83,6 +83,7 @@ import si.nejcj.goalball.scoresheet.util.Constants.TournamentGameTextType;
 import si.nejcj.goalball.scoresheet.util.Constants.TournamentListeners;
 import si.nejcj.goalball.scoresheet.util.Constants.TournamentTableModels;
 import si.nejcj.goalball.scoresheet.util.ErrorHandler;
+import si.nejcj.goalball.scoresheet.util.SwingAction;
 import si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants;
 import si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConverter;
 import si.nejcj.goalball.scoresheet.util.pdf.PdfUtil;
@@ -159,9 +160,21 @@ public class TournamentController {
     List<TournamentOfficial> tournamentOfficials = m_dbConnection
         .getTournamentOfficials(tournamentId);
 
+    for (TournamentTeam team : tournamentTeams) {
+      System.out.println(
+          String.format("'%s' %s", team.getSimpleName(), team.isMale()));
+    }
+    System.out.println();
+
+    for (TournamentOfficial official : tournamentOfficials) {
+      System.out.println(official.getFullName());
+    }
+
+    System.out.println(sheet.getPhysicalNumberOfRows());
+
     // Start at 2 as there is 1 empty row + header
-    for (int rowIndex = 2; rowIndex < sheet.getPhysicalNumberOfRows()
-        + 1; rowIndex++) {
+    for (int rowIndex = 2; rowIndex < sheet
+        .getPhysicalNumberOfRows(); rowIndex++) {
       Row row = sheet.getRow(rowIndex);
 
       String gameNumber = formatter.formatCellValue(row.getCell(1));
@@ -174,7 +187,23 @@ public class TournamentController {
       String awayTeam = formatter.formatCellValue(row.getCell(8));
       String tsRef = formatter.formatCellValue(row.getCell(9));
       String fsRef = formatter.formatCellValue(row.getCell(10));
+      String tenSec1 = formatter.formatCellValue(row.getCell(11));
+      String tenSec2 = formatter.formatCellValue(row.getCell(12));
 
+      String timerValue = formatter.formatCellValue(row.getCell(14));
+      String scorerValue = formatter.formatCellValue(row.getCell(15));
+      String backupTimerValue = formatter.formatCellValue(row.getCell(16));
+      String goalJudge1Value = formatter.formatCellValue(row.getCell(17));
+      String goalJudge2Value = formatter.formatCellValue(row.getCell(18));
+      String goalJudge3Value = formatter.formatCellValue(row.getCell(19));
+      String goalJudge4Value = formatter.formatCellValue(row.getCell(20));
+
+      System.out.println(gameNumber + "\t" + date + "\t" + time + "\t" + gender
+          + "\t" + pool + "\t" + venue + "\t" + homeTeam + "\t" + awayTeam
+          + "\t" + tsRef + "\t" + fsRef + "\t" + tenSec1 + "\t" + tenSec2 + "\t"
+          + scorerValue + "\t" + timerValue + "\t" + backupTimerValue + "\t"
+          + goalJudge1Value + "\t" + goalJudge2Value + "\t" + goalJudge3Value
+          + "\t" + goalJudge4Value);
       boolean isMaleGame = "Male".equals(gender);
 
       TournamentTeam tournamentTeamA = tournamentTeams.stream().filter(
@@ -188,6 +217,59 @@ public class TournamentController {
       TournamentOfficial refereeFs = tournamentOfficials.stream()
           .filter(o -> o.getFullName().equals(fsRef)).findFirst().get();
 
+      TournamentOfficial tenSeconds1 = null;
+      if (StringUtils.isNotBlank(tenSec1)) {
+        tenSeconds1 = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(tenSec1)).findFirst().get();
+      }
+      TournamentOfficial tenSeconds2 = null;
+      if (StringUtils.isNotBlank(tenSec2)) {
+        tenSeconds2 = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(tenSec2)).findFirst().get();
+      }
+
+      TournamentOfficial scorer = null;
+      if (StringUtils.isNotBlank(scorerValue)) {
+        scorer = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(scorerValue)).findFirst().get();
+      }
+      TournamentOfficial timer = null;
+      if (StringUtils.isNotBlank(timerValue)) {
+        timer = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(timerValue)).findFirst().get();
+      }
+      TournamentOfficial backupTimer = null;
+      if (StringUtils.isNotBlank(backupTimerValue)) {
+        backupTimer = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(backupTimerValue)).findFirst()
+            .get();
+      }
+
+      TournamentOfficial goalJudge1 = null;
+      if (StringUtils.isNotBlank(goalJudge1Value)) {
+        goalJudge1 = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(goalJudge1Value)).findFirst()
+            .get();
+      }
+      TournamentOfficial goalJudge2 = null;
+      if (StringUtils.isNotBlank(goalJudge2Value)) {
+        goalJudge2 = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(goalJudge2Value)).findFirst()
+            .get();
+      }
+      TournamentOfficial goalJudge3 = null;
+      if (StringUtils.isNotBlank(goalJudge3Value)) {
+        goalJudge3 = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(goalJudge3Value)).findFirst()
+            .get();
+      }
+      TournamentOfficial goalJudge4 = null;
+      if (StringUtils.isNotBlank(goalJudge4Value)) {
+        goalJudge4 = tournamentOfficials.stream()
+            .filter(o -> o.getFullName().equals(goalJudge4Value)).findFirst()
+            .get();
+      }
+
       TournamentGame game = new TournamentGame();
       game.setGameNumber(Integer.parseInt(gameNumber));
       game.setGameDate(format.parse(date));
@@ -199,27 +281,37 @@ public class TournamentController {
       game.setTeamB(tournamentTeamB);
       game.setReferee1(refereeTs);
       game.setReferee2(refereeFs);
+      game.setTenSeconds1(tenSeconds1);
+      game.setTenSeconds2(tenSeconds2);
       game.setTournament(tournament);
+      game.setScorer(scorer);
+      game.setTimer(timer);
+      game.setBackupTimer(backupTimer);
+      game.setGoalJudge1(goalJudge1);
+      game.setGoalJudge2(goalJudge2);
+      game.setGoalJudge3(goalJudge3);
+      game.setGoalJudge4(goalJudge4);
       m_dbConnection.insertTournamentGame(game);
     }
 
     List<TournamentGame> tournamentGames = m_dbConnection
         .getTournamentGames(tournamentId);
     m_tournamentGamesTableModel.addTournamentGames(tournamentGames);
+    // TODO: Refresh
   }
 
   private TournamentDataPanel initTournamentDataPanel() {
     Map<TournamentListeners, EventListener> tournamentDataPanelListeners = new HashMap<TournamentListeners, EventListener>();
     tournamentDataPanelListeners.put(TournamentListeners.TEAM_EDIT,
-        new TeamEditAction());
+        SwingAction.of("Edit", e -> editTeam()));
     tournamentDataPanelListeners.put(TournamentListeners.TEAM_ADD,
-        new TeamAddAction());
+        SwingAction.of("<-", e -> addTeam()));
     tournamentDataPanelListeners.put(TournamentListeners.TEAM_REMOVE,
-        new TeamRemoveAction());
+        SwingAction.of("->", e -> removeTeam()));
     tournamentDataPanelListeners.put(TournamentListeners.OFFICIAL_ADD,
-        new OfficialAddAction());
+        SwingAction.of("<-", e -> addOfficial()));
     tournamentDataPanelListeners.put(TournamentListeners.OFFICIAL_REMOVE,
-        new OfficialRemoveAction());
+        SwingAction.of("->", e -> removeOfficial()));
 
     List<Team> tournamentTeams = m_dbConnection
         .getParticipatingTeams(m_tournament.getId());
@@ -260,11 +352,11 @@ public class TournamentController {
   private TournamentGamesPanel initTournamentGamesPanel() {
     Map<TournamentListeners, EventListener> tournamentGamesPanelListeners = new HashMap<TournamentListeners, EventListener>();
     tournamentGamesPanelListeners.put(TournamentListeners.GAME_ADD,
-        new TournamentGameAddAction());
+        SwingAction.of("Add game", e -> addGame()));
     tournamentGamesPanelListeners.put(TournamentListeners.GAME_EDIT,
         new TournamentGameEditAction());
     tournamentGamesPanelListeners.put(TournamentListeners.GAME_REMOVE,
-        new TournamentGameRemoveAction());
+        SwingAction.of("Remove game", e -> removeGame()));
     tournamentGamesPanelListeners.put(TournamentListeners.GAME_RESULTS,
         new GameResultsAction());
     tournamentGamesPanelListeners.put(TournamentListeners.GAME_IMPORT,
@@ -375,411 +467,39 @@ public class TournamentController {
     }
   }
 
-  class TeamEditAction extends AbstractAction {
+  private void editTeam() {
+    int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
+    if (selectedRow != -1) {
+      Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
 
-    private static final long serialVersionUID = 1L;
-
-    public TeamEditAction() {
-      super("Edit");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
-      if (selectedRow != -1) {
-        Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
-
-        int tournamentTeamId = m_dbConnection
-            .getTournamentTeamId(m_tournament.getId(), team.getId());
-        List<TournamentPlayer> tournamentTeamPlayers = m_dbConnection
-            .getTournamentTeamPlayers(tournamentTeamId);
-        List<TournamentStaff> tournamentTeamStaff = m_dbConnection
-            .getTournamentTeamStaff(tournamentTeamId);
-        List<TournamentStaff> staffMembers = m_dbConnection
-            .getStaffByTeamId(team.getId(), TournamentStaff.class);
-        List<TournamentPlayer> players = m_dbConnection
-            .getPlayersByTeamId(team.getId(), TournamentPlayer.class);
-        final TournamentStaffMembersTableModel staffTableModel = new TournamentStaffMembersTableModel(
-            staffMembers, tournamentTeamStaff);
-        final TournamentPlayersTableModel playersTableModel = new TournamentPlayersTableModel(
-            players, tournamentTeamPlayers);
-        final ManageTournamentTeamPanel manageTournamentTeamPanel = new ManageTournamentTeamPanel(
-            team.getTeamName(), playersTableModel, staffTableModel,
-            ALLOWED_PLAYER_NUMBERS);
-        final JOptionPane optionPane = new JOptionPane(
-            manageTournamentTeamPanel, JOptionPane.QUESTION_MESSAGE,
-            JOptionPane.OK_CANCEL_OPTION);
-        final JDialog dialog = optionPane.createDialog(m_tournamentPanel,
-            "Select team members for tournament");
-        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        dialog.setModal(true);
-        dialog.addWindowListener(new WindowAdapter() {
-          public void windowClosing(WindowEvent we) {
-            // Window can only be closed by pressing OK or Cancel
-          }
-        });
-        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent e) {
-            String prop = e.getPropertyName();
-
-            if (e.getSource() == optionPane
-                && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-              if (e.getNewValue() instanceof Integer) {
-                if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                  dialog.setVisible(false);
-                  return;
-                } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                  List<TournamentPlayer> selectedPlayers = playersTableModel
-                      .getSelectedPlayers();
-                  if (selectedPlayers == null || selectedPlayers.size() < 3) {
-                    ErrorHandler.userErr("At least 3 players must be selected");
-                    dialog.setVisible(true);
-                    return;
-                  }
-                  List<Integer> selectedNumbers = new ArrayList<Integer>();
-                  for (TournamentPlayer player : selectedPlayers) {
-                    Integer playerNumber = player.getPlayerNumber();
-                    if (playerNumber == null) {
-                      ErrorHandler
-                          .userErr("All players must have a number selected");
-                      dialog.setVisible(true);
-                      return;
-                    }
-                    if (selectedNumbers.contains(playerNumber)) {
-                      ErrorHandler
-                          .userErr("Two players cannot have the same number");
-                      dialog.setVisible(true);
-                      return;
-                    }
-                    selectedNumbers.add(playerNumber);
-                  }
-                  dialog.setVisible(false);
-                }
-              }
-            }
-          }
-        });
-        dialog.pack();
-        dialog.setVisible(true);
-
-        Integer value = (Integer) optionPane.getValue();
-        if (value != null && value == JOptionPane.OK_OPTION) {
-          try {
-            List<TournamentPlayer> removedPlayers = playersTableModel
-                .getRemovedPlayers();
-            List<TournamentPlayer> updatedPlayers = playersTableModel
-                .getUpdatedPlayers();
-            List<TournamentPlayer> addedPlayers = playersTableModel
-                .getAddedPlayers();
-
-            for (TournamentPlayer player : removedPlayers) {
-              m_dbConnection.deleteTournamentTeamPlayer(player.getId());
-            }
-
-            for (TournamentPlayer player : updatedPlayers) {
-              m_dbConnection.updateTournamentPlayer(player);
-            }
-
-            for (TournamentPlayer player : addedPlayers) {
-              m_dbConnection.insertTournamentPlayer(player.getId(),
-                  tournamentTeamId, player.getPlayerNumber());
-            }
-          } catch (InternalIntegrityConstraintException ex) {
-            ErrorHandler.userWrn(ex.getMessage());
-          } catch (InternalTechnicalException ex) {
-            ErrorHandler.sysErr("Problem adding team to tournament",
-                ex.getMessage(), ex);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class TeamAddAction extends AbstractAction {
-
-    public TeamAddAction() {
-      super("<-");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      int selectedRow = m_tournamentPanel.getSelectedAllTeamsRow();
-      if (selectedRow != -1) {
-        Team team = m_allTeamsTableModel.getTeam(selectedRow);
-        List<TournamentStaff> staffMembers = m_dbConnection
-            .getStaffByTeamId(team.getId(), TournamentStaff.class);
-        List<TournamentPlayer> players = m_dbConnection
-            .getPlayersByTeamId(team.getId(), TournamentPlayer.class);
-        final TournamentStaffMembersTableModel staffTableModel = new TournamentStaffMembersTableModel(
-            staffMembers);
-        final TournamentPlayersTableModel playersTableModel = new TournamentPlayersTableModel(
-            players);
-        final ManageTournamentTeamPanel manageTournamentTeamPanel = new ManageTournamentTeamPanel(
-            team.getTeamName(), playersTableModel, staffTableModel,
-            ALLOWED_PLAYER_NUMBERS);
-        final JOptionPane optionPane = new JOptionPane(
-            manageTournamentTeamPanel, JOptionPane.QUESTION_MESSAGE,
-            JOptionPane.OK_CANCEL_OPTION);
-        final JDialog dialog = optionPane.createDialog(m_tournamentPanel,
-            "Select team members for tournament");
-        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        dialog.setModal(true);
-        dialog.addWindowListener(new WindowAdapter() {
-          public void windowClosing(WindowEvent we) {
-            // Window can only be closed by pressing OK or Cancel
-          }
-        });
-        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent e) {
-            String prop = e.getPropertyName();
-
-            if (e.getSource() == optionPane
-                && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-              if (e.getNewValue() instanceof Integer) {
-                if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                  dialog.setVisible(false);
-                  return;
-                } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                  List<TournamentPlayer> selectedPlayers = playersTableModel
-                      .getSelectedPlayers();
-                  if (selectedPlayers == null || selectedPlayers.size() < 3) {
-                    ErrorHandler.userErr("At least 3 players must be selected");
-                    dialog.setVisible(true);
-                    return;
-                  }
-                  List<Integer> selectedNumbers = new ArrayList<Integer>();
-                  for (TournamentPlayer player : selectedPlayers) {
-                    Integer playerNumber = player.getPlayerNumber();
-                    if (playerNumber == null) {
-                      ErrorHandler
-                          .userErr("All players must have a number selected");
-                      dialog.setVisible(true);
-                      return;
-                    }
-                    if (selectedNumbers.contains(playerNumber)) {
-                      ErrorHandler
-                          .userErr("Two players cannot have the same number");
-                      dialog.setVisible(true);
-                      return;
-                    }
-                    selectedNumbers.add(playerNumber);
-                  }
-                  dialog.setVisible(false);
-                }
-              }
-            }
-          }
-        });
-        dialog.pack();
-        dialog.setVisible(true);
-
-        Integer value = (Integer) optionPane.getValue();
-        if (value != null && value == JOptionPane.OK_OPTION) {
-          try {
-            List<TournamentPlayer> selectedPlayers = playersTableModel
-                .getSelectedPlayers();
-            List<TournamentStaff> selectedStaffMembers = staffTableModel
-                .getSelectedStaffMembers();
-            Integer tournamentTeamId = m_dbConnection
-                .addTeamToTournament(m_tournament.getId(), team.getId());
-            for (TournamentPlayer player : selectedPlayers) {
-              m_dbConnection.insertTournamentPlayer(player.getId(),
-                  tournamentTeamId, player.getPlayerNumber());
-            }
-            for (TournamentStaff staffMember : selectedStaffMembers) {
-              m_dbConnection.insertTournamentStaff(staffMember.getId(),
-                  tournamentTeamId);
-            }
-            m_allTeamsTableModel.removeTeam(team, selectedRow);
-            m_tournamentTeamsTableModel.addTeam(team);
-          } catch (InternalTechnicalException ex) {
-            ErrorHandler.sysErr("Problem adding team to tournament",
-                ex.getMessage(), ex);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class TeamRemoveAction extends AbstractAction {
-    public TeamRemoveAction() {
-      super("->");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-      int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
-      if (selectedRow != -1) {
-        Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
-        Integer tournamentTeamId = m_dbConnection
-            .getTournamentTeamId(m_tournament.getId(), team.getId());
-        try {
-          m_dbConnection.deleteTournamentTeamData(tournamentTeamId);
-          m_tournamentTeamsTableModel.removeTeam(team, selectedRow);
-          m_allTeamsTableModel.addTeam(team);
-        } catch (InternalIntegrityConstraintException ex) {
-          ErrorHandler.userWrn(ex.getMessage());
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem deleting team from tournament",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class OfficialAddAction extends AbstractAction {
-    public OfficialAddAction() {
-      super("<-");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      int selectedRow = m_tournamentPanel.getSelectedAllOfficialsRow();
-      if (selectedRow != -1) {
-        try {
-          Official official = m_allOfficialsTableModel.getOfficial(selectedRow);
-          m_dbConnection.addOfficialToTournament(m_tournament.getId(),
-              official.getId());
-          m_allOfficialsTableModel.removeOfficial(official, selectedRow);
-          m_tournamentOfficialsTableModel.addOfficial(official);
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem adding official to tournament",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class OfficialRemoveAction extends AbstractAction {
-    public OfficialRemoveAction() {
-      super("->");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-      int selectedRow = m_tournamentPanel.getSelectedTournamentOfficialsRow();
-      if (selectedRow != -1) {
-        Official official = m_tournamentOfficialsTableModel
-            .getOfficial(selectedRow);
-        try {
-          m_dbConnection.deleteOfficialFromTournament(m_tournament.getId(),
-              official.getId());
-          m_tournamentOfficialsTableModel.removeOfficial(official, selectedRow);
-          m_allOfficialsTableModel.addOfficial(official);
-        } catch (InternalIntegrityConstraintException ex) {
-          ErrorHandler.userWrn(ex.getMessage());
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem deleting official from tournament",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class TournamentGameAddAction extends AbstractAction {
-    private TournamentGame tournamentGame;
-
-    public TournamentGameAddAction() {
-      super("Add game");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      tournamentGame = new TournamentGame();
-      tournamentGame.setTournament(m_tournament);
-      String defaultVenue = m_tournament.getLocation();
-      Map<TournamentGameListeners, EventListener> tournamentGameDataListeners = new HashMap<TournamentGameListeners, EventListener>();
-      tournamentGameDataListeners.put(TournamentGameListeners.GAME_NUMBER,
-          new TournamentGameNumberListener(tournamentGame));
-      tournamentGameDataListeners.put(TournamentGameListeners.TEAM_A,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.TEAM_A));
-      tournamentGameDataListeners.put(TournamentGameListeners.TEAM_B,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.TEAM_B));
-      tournamentGameDataListeners.put(TournamentGameListeners.DATE,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.DATE));
-      tournamentGameDataListeners.put(TournamentGameListeners.REFEREE_1,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.REFEREE_1));
-      tournamentGameDataListeners.put(TournamentGameListeners.REFEREE_2,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.REFEREE_2));
-      tournamentGameDataListeners.put(TournamentGameListeners.TEN_SEC_1,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.TEN_SEC_1));
-      tournamentGameDataListeners.put(TournamentGameListeners.TEN_SEC_2,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.TEN_SEC_2));
-      tournamentGameDataListeners.put(TournamentGameListeners.SCORER,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.SCORER));
-      tournamentGameDataListeners.put(TournamentGameListeners.TIMER,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.TIMER));
-      tournamentGameDataListeners.put(TournamentGameListeners.BACKUP_TIMER,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.BACKUP_TIMER));
-      tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_1,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.GOAL_JUDGE_1));
-      tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_2,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.GOAL_JUDGE_2));
-      tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_3,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.GOAL_JUDGE_3));
-      tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_4,
-          new TournamentGameComboBoxListener(tournamentGame,
-              TournamentGameComboBoxType.GOAL_JUDGE_4));
-      tournamentGameDataListeners.put(TournamentGameListeners.TIME,
-          new TournamentGameCaretListener(tournamentGame,
-              TournamentGameTextType.TIME));
-      tournamentGameDataListeners.put(TournamentGameListeners.POOL,
-          new TournamentGameCaretListener(tournamentGame,
-              TournamentGameTextType.POOL));
-      tournamentGameDataListeners.put(TournamentGameListeners.VENUE,
-          new TournamentGameCaretListener(tournamentGame,
-              TournamentGameTextType.VENUE));
-      tournamentGameDataListeners.put(TournamentGameListeners.GENDER,
-          new TournamentGameGenderSelectionListener(tournamentGame));
-      final TournamentGameDataPanel gameDataPanel = new TournamentGameDataPanel(
-          tournamentGameDataListeners,
-          m_dbConnection.getTournamentTeams(m_tournament.getId()),
-          m_dbConnection.getTournamentOfficials(m_tournament.getId()),
-          calculateAvailableDates(m_tournament.getStartDate(),
-              m_tournament.getEndDate()),
-          defaultVenue);
-      tournamentGame.setVenue(defaultVenue);
-      gameDataPanel.selectDefaultData();
-      final JOptionPane optionPane = new JOptionPane(gameDataPanel,
+      int tournamentTeamId = m_dbConnection
+          .getTournamentTeamId(m_tournament.getId(), team.getId());
+      List<TournamentPlayer> tournamentTeamPlayers = m_dbConnection
+          .getTournamentTeamPlayers(tournamentTeamId);
+      List<TournamentStaff> tournamentTeamStaff = m_dbConnection
+          .getTournamentTeamStaff(tournamentTeamId);
+      List<TournamentStaff> staffMembers = m_dbConnection
+          .getStaffByTeamId(team.getId(), TournamentStaff.class);
+      List<TournamentPlayer> players = m_dbConnection
+          .getPlayersByTeamId(team.getId(), TournamentPlayer.class);
+      final TournamentStaffMembersTableModel staffTableModel = new TournamentStaffMembersTableModel(
+          staffMembers, tournamentTeamStaff);
+      final TournamentPlayersTableModel playersTableModel = new TournamentPlayersTableModel(
+          players, tournamentTeamPlayers);
+      final ManageTournamentTeamPanel manageTournamentTeamPanel = new ManageTournamentTeamPanel(
+          team.getTeamName(), playersTableModel, staffTableModel,
+          ALLOWED_PLAYER_NUMBERS);
+      final JOptionPane optionPane = new JOptionPane(manageTournamentTeamPanel,
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-      final JDialog dialog = optionPane.createDialog(gameDataPanel, "Add game");
+      final JDialog dialog = optionPane.createDialog(m_tournamentPanel,
+          "Select team members for tournament");
       dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-
       dialog.setModal(true);
       dialog.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent we) {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-
       optionPane.addPropertyChangeListener(new PropertyChangeListener() {
         public void propertyChange(PropertyChangeEvent e) {
           String prop = e.getPropertyName();
@@ -791,10 +511,29 @@ public class TournamentController {
                 dialog.setVisible(false);
                 return;
               } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                if (!tournamentGame.hasValidData()) {
-                  ErrorHandler.userErr("All required data must be selected");
+                List<TournamentPlayer> selectedPlayers = playersTableModel
+                    .getSelectedPlayers();
+                if (selectedPlayers == null || selectedPlayers.size() < 3) {
+                  ErrorHandler.userErr("At least 3 players must be selected");
                   dialog.setVisible(true);
                   return;
+                }
+                List<Integer> selectedNumbers = new ArrayList<Integer>();
+                for (TournamentPlayer player : selectedPlayers) {
+                  Integer playerNumber = player.getPlayerNumber();
+                  if (playerNumber == null) {
+                    ErrorHandler
+                        .userErr("All players must have a number selected");
+                    dialog.setVisible(true);
+                    return;
+                  }
+                  if (selectedNumbers.contains(playerNumber)) {
+                    ErrorHandler
+                        .userErr("Two players cannot have the same number");
+                    dialog.setVisible(true);
+                    return;
+                  }
+                  selectedNumbers.add(playerNumber);
                 }
                 dialog.setVisible(false);
               }
@@ -802,23 +541,330 @@ public class TournamentController {
           }
         }
       });
-
       dialog.pack();
       dialog.setVisible(true);
 
       Integer value = (Integer) optionPane.getValue();
       if (value != null && value == JOptionPane.OK_OPTION) {
         try {
-          Integer tournamentGameId = m_dbConnection
-              .insertTournamentGame(tournamentGame);
-          tournamentGame.setId(tournamentGameId);
-          m_tournamentGamesTableModel.addTournamentGame(tournamentGame);
+          List<TournamentPlayer> removedPlayers = playersTableModel
+              .getRemovedPlayers();
+          List<TournamentPlayer> updatedPlayers = playersTableModel
+              .getUpdatedPlayers();
+          List<TournamentPlayer> addedPlayers = playersTableModel
+              .getAddedPlayers();
+
+          for (TournamentPlayer player : removedPlayers) {
+            m_dbConnection.deleteTournamentTeamPlayer(player.getId());
+          }
+
+          for (TournamentPlayer player : updatedPlayers) {
+            m_dbConnection.updateTournamentPlayer(player);
+          }
+
+          for (TournamentPlayer player : addedPlayers) {
+            m_dbConnection.insertTournamentPlayer(player.getId(),
+                tournamentTeamId, player.getPlayerNumber());
+          }
+
+          for (TournamentStaff staff : staffTableModel
+              .getRemovedStaffMembers()) {
+            m_dbConnection.deleteTournamentTeamStaff(staff.getId());
+          }
+          for (TournamentStaff staff : staffTableModel.getAddedStaffMembers()) {
+            m_dbConnection.insertTournamentStaff(staff.getId(),
+                tournamentTeamId);
+          }
+        } catch (InternalIntegrityConstraintException ex) {
+          ErrorHandler.userWrn(ex.getMessage());
         } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem adding tournament game", ex.getMessage(),
-              ex);
+          ErrorHandler.sysErr("Problem adding team to tournament",
+              ex.getMessage(), ex);
         } catch (Throwable t) {
           ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
+      }
+    }
+  }
+
+  public void addTeam() {
+    int selectedRow = m_tournamentPanel.getSelectedAllTeamsRow();
+    if (selectedRow != -1) {
+      Team team = m_allTeamsTableModel.getTeam(selectedRow);
+      List<TournamentStaff> staffMembers = m_dbConnection
+          .getStaffByTeamId(team.getId(), TournamentStaff.class);
+      List<TournamentPlayer> players = m_dbConnection
+          .getPlayersByTeamId(team.getId(), TournamentPlayer.class);
+      final TournamentStaffMembersTableModel staffTableModel = new TournamentStaffMembersTableModel(
+          staffMembers);
+      final TournamentPlayersTableModel playersTableModel = new TournamentPlayersTableModel(
+          players);
+      final ManageTournamentTeamPanel manageTournamentTeamPanel = new ManageTournamentTeamPanel(
+          team.getTeamName(), playersTableModel, staffTableModel,
+          ALLOWED_PLAYER_NUMBERS);
+      final JOptionPane optionPane = new JOptionPane(manageTournamentTeamPanel,
+          JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+      final JDialog dialog = optionPane.createDialog(m_tournamentPanel,
+          "Select team members for tournament");
+      dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+      dialog.setModal(true);
+      dialog.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent we) {
+          // Window can only be closed by pressing OK or Cancel
+        }
+      });
+      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent e) {
+          String prop = e.getPropertyName();
+
+          if (e.getSource() == optionPane
+              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+            if (e.getNewValue() instanceof Integer) {
+              if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+                dialog.setVisible(false);
+                return;
+              } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+                List<TournamentPlayer> selectedPlayers = playersTableModel
+                    .getSelectedPlayers();
+                if (selectedPlayers == null || selectedPlayers.size() < 3) {
+                  ErrorHandler.userErr("At least 3 players must be selected");
+                  dialog.setVisible(true);
+                  return;
+                }
+                List<Integer> selectedNumbers = new ArrayList<Integer>();
+                for (TournamentPlayer player : selectedPlayers) {
+                  Integer playerNumber = player.getPlayerNumber();
+                  if (playerNumber == null) {
+                    ErrorHandler
+                        .userErr("All players must have a number selected");
+                    dialog.setVisible(true);
+                    return;
+                  }
+                  if (selectedNumbers.contains(playerNumber)) {
+                    ErrorHandler
+                        .userErr("Two players cannot have the same number");
+                    dialog.setVisible(true);
+                    return;
+                  }
+                  selectedNumbers.add(playerNumber);
+                }
+                dialog.setVisible(false);
+              }
+            }
+          }
+        }
+      });
+      dialog.pack();
+      dialog.setVisible(true);
+
+      Integer value = (Integer) optionPane.getValue();
+      if (value != null && value == JOptionPane.OK_OPTION) {
+        try {
+          List<TournamentPlayer> selectedPlayers = playersTableModel
+              .getSelectedPlayers();
+          List<TournamentStaff> selectedStaffMembers = staffTableModel
+              .getSelectedStaffMembers();
+          Integer tournamentTeamId = m_dbConnection
+              .addTeamToTournament(m_tournament.getId(), team.getId());
+          for (TournamentPlayer player : selectedPlayers) {
+            m_dbConnection.insertTournamentPlayer(player.getId(),
+                tournamentTeamId, player.getPlayerNumber());
+          }
+          for (TournamentStaff staffMember : selectedStaffMembers) {
+            m_dbConnection.insertTournamentStaff(staffMember.getId(),
+                tournamentTeamId);
+          }
+          m_allTeamsTableModel.removeTeam(team, selectedRow);
+          m_tournamentTeamsTableModel.addTeam(team);
+        } catch (InternalTechnicalException ex) {
+          ErrorHandler.sysErr("Problem adding team to tournament",
+              ex.getMessage(), ex);
+        } catch (Throwable t) {
+          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+        }
+      }
+    }
+  }
+
+  public void removeTeam() {
+    int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
+    if (selectedRow != -1) {
+      Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
+      Integer tournamentTeamId = m_dbConnection
+          .getTournamentTeamId(m_tournament.getId(), team.getId());
+      try {
+        m_dbConnection.deleteTournamentTeamData(tournamentTeamId);
+        m_tournamentTeamsTableModel.removeTeam(team, selectedRow);
+        m_allTeamsTableModel.addTeam(team);
+      } catch (InternalIntegrityConstraintException ex) {
+        ErrorHandler.userWrn(ex.getMessage());
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem deleting team from tournament",
+            ex.getMessage(), ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+      }
+    }
+  }
+
+  private void addOfficial() {
+    int selectedRow = m_tournamentPanel.getSelectedAllOfficialsRow();
+    if (selectedRow != -1) {
+      try {
+        Official official = m_allOfficialsTableModel.getOfficial(selectedRow);
+        m_dbConnection.addOfficialToTournament(m_tournament.getId(),
+            official.getId());
+        m_allOfficialsTableModel.removeOfficial(official, selectedRow);
+        m_tournamentOfficialsTableModel.addOfficial(official);
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem adding official to tournament",
+            ex.getMessage(), ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+      }
+    }
+  }
+
+  private void removeOfficial() {
+    int selectedRow = m_tournamentPanel.getSelectedTournamentOfficialsRow();
+    if (selectedRow != -1) {
+      Official official = m_tournamentOfficialsTableModel
+          .getOfficial(selectedRow);
+      try {
+        m_dbConnection.deleteOfficialFromTournament(m_tournament.getId(),
+            official.getId());
+        m_tournamentOfficialsTableModel.removeOfficial(official, selectedRow);
+        m_allOfficialsTableModel.addOfficial(official);
+      } catch (InternalIntegrityConstraintException ex) {
+        ErrorHandler.userWrn(ex.getMessage());
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem deleting official from tournament",
+            ex.getMessage(), ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+      }
+    }
+  }
+
+  private void addGame() {
+    TournamentGame tournamentGame = new TournamentGame();
+    tournamentGame.setTournament(m_tournament);
+    String defaultVenue = m_tournament.getLocation();
+    Map<TournamentGameListeners, EventListener> tournamentGameDataListeners = new HashMap<TournamentGameListeners, EventListener>();
+    tournamentGameDataListeners.put(TournamentGameListeners.GAME_NUMBER,
+        new TournamentGameNumberListener(tournamentGame));
+    tournamentGameDataListeners.put(TournamentGameListeners.TEAM_A,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.TEAM_A));
+    tournamentGameDataListeners.put(TournamentGameListeners.TEAM_B,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.TEAM_B));
+    tournamentGameDataListeners.put(TournamentGameListeners.DATE,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.DATE));
+    tournamentGameDataListeners.put(TournamentGameListeners.REFEREE_1,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.REFEREE_1));
+    tournamentGameDataListeners.put(TournamentGameListeners.REFEREE_2,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.REFEREE_2));
+    tournamentGameDataListeners.put(TournamentGameListeners.TEN_SEC_1,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.TEN_SEC_1));
+    tournamentGameDataListeners.put(TournamentGameListeners.TEN_SEC_2,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.TEN_SEC_2));
+    tournamentGameDataListeners.put(TournamentGameListeners.SCORER,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.SCORER));
+    tournamentGameDataListeners.put(TournamentGameListeners.TIMER,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.TIMER));
+    tournamentGameDataListeners.put(TournamentGameListeners.BACKUP_TIMER,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.BACKUP_TIMER));
+    tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_1,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.GOAL_JUDGE_1));
+    tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_2,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.GOAL_JUDGE_2));
+    tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_3,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.GOAL_JUDGE_3));
+    tournamentGameDataListeners.put(TournamentGameListeners.GOAL_JUDGE_4,
+        new TournamentGameComboBoxListener(tournamentGame,
+            TournamentGameComboBoxType.GOAL_JUDGE_4));
+    tournamentGameDataListeners.put(TournamentGameListeners.TIME,
+        new TournamentGameCaretListener(tournamentGame,
+            TournamentGameTextType.TIME));
+    tournamentGameDataListeners.put(TournamentGameListeners.POOL,
+        new TournamentGameCaretListener(tournamentGame,
+            TournamentGameTextType.POOL));
+    tournamentGameDataListeners.put(TournamentGameListeners.VENUE,
+        new TournamentGameCaretListener(tournamentGame,
+            TournamentGameTextType.VENUE));
+    tournamentGameDataListeners.put(TournamentGameListeners.GENDER,
+        new TournamentGameGenderSelectionListener(tournamentGame));
+    final TournamentGameDataPanel gameDataPanel = new TournamentGameDataPanel(
+        tournamentGameDataListeners,
+        m_dbConnection.getTournamentTeams(m_tournament.getId()),
+        m_dbConnection.getTournamentOfficials(m_tournament.getId()),
+        calculateAvailableDates(m_tournament.getStartDate(),
+            m_tournament.getEndDate()),
+        defaultVenue);
+    tournamentGame.setVenue(defaultVenue);
+    gameDataPanel.selectDefaultData();
+    final JOptionPane optionPane = new JOptionPane(gameDataPanel,
+        JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+    final JDialog dialog = optionPane.createDialog(gameDataPanel, "Add game");
+    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+
+    dialog.setModal(true);
+    dialog.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        // Window can only be closed by pressing OK or Cancel
+      }
+    });
+
+    optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        String prop = e.getPropertyName();
+
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer) {
+            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              dialog.setVisible(false);
+              return;
+            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+              if (!tournamentGame.hasValidData()) {
+                ErrorHandler.userErr("All required data must be selected");
+                dialog.setVisible(true);
+                return;
+              }
+              dialog.setVisible(false);
+            }
+          }
+        }
+      }
+    });
+
+    dialog.pack();
+    dialog.setVisible(true);
+
+    Integer value = (Integer) optionPane.getValue();
+    if (value != null && value == JOptionPane.OK_OPTION) {
+      try {
+        Integer tournamentGameId = m_dbConnection
+            .insertTournamentGame(tournamentGame);
+        tournamentGame.setId(tournamentGameId);
+        m_tournamentGamesTableModel.addTournamentGame(tournamentGame);
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem adding tournament game", ex.getMessage(),
+            ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
     }
   }
@@ -841,8 +887,6 @@ public class TournamentController {
         return;
       }
 
-      // tournamentGame = m_tournamentGamesTableModel
-      // .removeTournamentGame(selectedRow);
       tournamentGame = m_tournamentGamesTableModel
           .getTournamentGame(selectedRow);
 
@@ -971,38 +1015,29 @@ public class TournamentController {
     }
   }
 
-  @SuppressWarnings("serial")
-  class TournamentGameRemoveAction extends AbstractAction {
-    public TournamentGameRemoveAction() {
-      super("Remove game");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-      int selectedRow = m_tournamentPanel.getSelectedGamesRow();
-      if (selectedRow != -1) {
-        int selection = JOptionPane.showConfirmDialog(m_tournamentPanel,
-            "Are you sure you want to delete the selected game?",
-            "Delete player", JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
-        if (selection == JOptionPane.YES_OPTION) {
-          TournamentGame tournamentGame = m_tournamentGamesTableModel
-              .getTournamentGame(selectedRow);
-          try {
-            m_dbConnection.deleteTournamentGameById(tournamentGame.getId());
-            m_tournamentGamesTableModel.removeTournamentGame(tournamentGame,
-                selectedRow);
-          } catch (InternalTechnicalException ex) {
-            ErrorHandler.sysErr("Problem deleting game from database",
-                ex.getMessage(), ex);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
+  private void removeGame() {
+    int selectedRow = m_tournamentPanel.getSelectedGamesRow();
+    if (selectedRow != -1) {
+      int selection = JOptionPane.showConfirmDialog(m_tournamentPanel,
+          "Are you sure you want to delete the selected game?", "Delete player",
+          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+      if (selection == JOptionPane.YES_OPTION) {
+        TournamentGame tournamentGame = m_tournamentGamesTableModel
+            .getTournamentGame(selectedRow);
+        try {
+          m_dbConnection.deleteTournamentGameById(tournamentGame.getId());
+          m_tournamentGamesTableModel.removeTournamentGame(tournamentGame,
+              selectedRow);
+        } catch (InternalTechnicalException ex) {
+          ErrorHandler.sysErr("Problem deleting game from database",
+              ex.getMessage(), ex);
+        } catch (Throwable t) {
+          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
-      } else {
-        JOptionPane.showMessageDialog(m_tournamentPanel, "Please select a game",
-            "No row selected", JOptionPane.WARNING_MESSAGE);
       }
+    } else {
+      JOptionPane.showMessageDialog(m_tournamentPanel, "Please select a game",
+          "No row selected", JOptionPane.WARNING_MESSAGE);
     }
   }
 
@@ -1229,10 +1264,12 @@ public class TournamentController {
       List<TournamentStaff> staff = m_dbConnection
           .getTournamentTeamStaff(team.getId());
 
-      Map<String, String> teamDataMap = PdfFieldConverter
-          .createLineUpSheetMap(team.getTeamName(), players, staff);
+      Map<String, String> teamDataMap = PdfFieldConverter.createLineUpSheetMap(
+          team.getTeamName() + (team.isMale() ? " (Male)" : " (Female)"),
+          players, staff);
 
-      File outputFile = new File(directoryPath, team.getTeamName() + ".pdf");
+      File outputFile = new File(directoryPath,
+          team.getTeamName() + (team.isMale() ? ".male" : ".female") + ".pdf");
 
       PdfUtil.createPdfFromTemplate(teamDataMap, lineUpSheetTemplate,
           outputFile);
@@ -1683,6 +1720,38 @@ public class TournamentController {
           importTournamentGames(file, m_tournament.getId());
         }
 
+        // List<Team> teams = m_dbConnection.getTeams(true);
+        // for (Team team : teams) {
+        // Player player1 = new Player();
+        // player1.setFirstName("testFirstName");
+        // player1.setLastName("testPlayer1");
+        // int player1Id = m_dbConnection.insertPlayer(player1, team.getId());
+        // Player player2 = new Player();
+        // player2.setFirstName("testFirstName");
+        // player2.setLastName("testPlayer2");
+        // int player2Id = m_dbConnection.insertPlayer(player2, team.getId());
+        // Player player3 = new Player();
+        // player3.setFirstName("testFirstName");
+        // player3.setLastName("testPlayer3");
+        // int player3Id = m_dbConnection.insertPlayer(player3, team.getId());
+        // int tournamentTeamId = m_dbConnection.addTeamToTournament(7,
+        // team.getId());
+        // m_dbConnection.insertTournamentPlayer(player1Id, tournamentTeamId,
+        // 1);
+        // m_dbConnection.insertTournamentPlayer(player2Id, tournamentTeamId,
+        // 2);
+        // m_dbConnection.insertTournamentPlayer(player3Id, tournamentTeamId,
+        // 3);
+        // }
+
+        // List<Team> tournamentTeams = m_dbConnection.getParticipatingTeams(7);
+        // for (Team team : tournamentTeams) {
+        //
+        // List<Player> players =
+        // m_dbConnection.getPlayersByTeamId(team.getId(), Player.class);
+        // m_dbConnection.insertTournamentPlayer(playerId, tournamentTeamId,
+        // playerNumber);
+        // }
 
       } catch (Throwable t) {
         ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
