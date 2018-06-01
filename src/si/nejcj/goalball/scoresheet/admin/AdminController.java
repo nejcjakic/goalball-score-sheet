@@ -91,7 +91,7 @@ public class AdminController {
     manageTeamDataPanelActions.put(ManageTeamDataActions.REMOVE_PLAYER_ACTION,
         SwingAction.of("Delete player", e -> deletePlayer()));
     manageTeamDataPanel = new ManageTeamDataPanel(manageTeamDataPanelActions);
-    manageTeamDataPanel.init(teamNamesModel, new TeamSelectionListener());
+    manageTeamDataPanel.init(teamNamesModel, teamSelectionListener);
 
     return manageTeamDataPanel;
   }
@@ -103,70 +103,102 @@ public class AdminController {
     officialLevelsComboBoxModel = new OfficialLevelsComboBoxModel(
         officialLevels);
     manageOfficialsDataPanel = new ManageOfficialsDataPanel(officialsTableModel,
-        officialLevelsComboBoxModel, new OfficialsTableModelListener(),
+        officialLevelsComboBoxModel, officialsTableModelListener,
         SwingAction.of("Add official", e -> addOfficial()),
         SwingAction.of("Delete official", e -> deleteOfficial()));
     return manageOfficialsDataPanel;
   }
 
-  class TeamSelectionListener implements ActionListener {
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      Object source = event.getSource();
-      if (source instanceof JComboBox) {
-        JComboBox sourceCB = (JComboBox) source;
-        Object selectedItem = sourceCB.getSelectedItem();
-        if (selectedItem instanceof Team) {
-          Team selectedTeam = (Team) selectedItem;
-          try {
-            staffMembersTableModel = new StaffMembersTableModel(m_dbConnection
-                .getStaffByTeamId(selectedTeam.getId(), Staff.class));
-            manageTeamDataPanel.setStaffTableModel(staffMembersTableModel,
-                new StaffTableModelListener());
-            staffMembersTableModel.fireTableDataChanged();
-
-            playersTableModel = new PlayersTableModel(m_dbConnection
-                .getPlayersByTeamId(selectedTeam.getId(), Player.class));
-            manageTeamDataPanel.setPlayersTableModel(playersTableModel,
-                new PlayersTableModelListener());
-            playersTableModel.fireTableDataChanged();
-          } catch (InternalTechnicalException e) {
-            ErrorHandler.sysErr("Problem retrieving data", e.getMessage(), e);
-          } catch (Throwable t) {
-            ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-          }
+  private TableModelListener playersTableModelListener = e -> {
+    if (e.getColumn() == -1) {
+      return;
+    }
+    int row = e.getFirstRow();
+    Player player = playersTableModel.getPlayer(row);
+    if (player != null) {
+      try {
+        Player dbPlayer = m_dbConnection.getPlayerById(player.getId());
+        if (!player.hasEqualData(dbPlayer)) {
+          m_dbConnection.updatePlayer(player);
         }
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem updating player in database.",
+            ex.getMessage(), ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
     }
-  }
+  };
 
-  class OfficialsTableModelListener implements TableModelListener {
-
-    @Override
-    public void tableChanged(TableModelEvent event) {
-      if (event.getColumn() == -1) {
-        return;
+  private TableModelListener staffTableModelListener = e -> {
+    if (e.getColumn() == -1) {
+      return;
+    }
+    int row = e.getFirstRow();
+    Staff staffMember = staffMembersTableModel.getStaffMember(row);
+    if (staffMember != null) {
+      try {
+        Staff dbStaffMember = m_dbConnection.getStaffById(staffMember.getId());
+        if (!staffMember.hasEqualData(dbStaffMember)) {
+          m_dbConnection.updateStaffMember(staffMember);
+        }
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem updating staff member in database.",
+            ex.getMessage(), ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
-      int row = event.getFirstRow();
-      Official official = officialsTableModel.getOfficial(row);
-      if (official != null) {
+    }
+  };
+
+  private ActionListener teamSelectionListener = event -> {
+    Object source = event.getSource();
+    if (source instanceof JComboBox) {
+      JComboBox sourceCB = (JComboBox) source;
+      Object selectedItem = sourceCB.getSelectedItem();
+      if (selectedItem instanceof Team) {
+        Team selectedTeam = (Team) selectedItem;
         try {
-          Official dbOfficial = m_dbConnection
-              .getOfficialById(official.getId());
-          if (!official.hasEqualData(dbOfficial)) {
-            m_dbConnection.updateOfficial(official);
-          }
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem updating official in database.",
-              ex.getMessage(), ex);
+          staffMembersTableModel = new StaffMembersTableModel(m_dbConnection
+              .getStaffByTeamId(selectedTeam.getId(), Staff.class));
+          manageTeamDataPanel.setStaffTableModel(staffMembersTableModel,
+              staffTableModelListener);
+          staffMembersTableModel.fireTableDataChanged();
+
+          playersTableModel = new PlayersTableModel(m_dbConnection
+              .getPlayersByTeamId(selectedTeam.getId(), Player.class));
+          manageTeamDataPanel.setPlayersTableModel(playersTableModel,
+              playersTableModelListener);
+          playersTableModel.fireTableDataChanged();
+        } catch (InternalTechnicalException e) {
+          ErrorHandler.sysErr("Problem retrieving data", e.getMessage(), e);
         } catch (Throwable t) {
           ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
         }
       }
     }
-  }
+  };
+
+  private TableModelListener officialsTableModelListener = event -> {
+    if (event.getColumn() == -1) {
+      return;
+    }
+    int row = event.getFirstRow();
+    Official official = officialsTableModel.getOfficial(row);
+    if (official != null) {
+      try {
+        Official dbOfficial = m_dbConnection.getOfficialById(official.getId());
+        if (!official.hasEqualData(dbOfficial)) {
+          m_dbConnection.updateOfficial(official);
+        }
+      } catch (InternalTechnicalException ex) {
+        ErrorHandler.sysErr("Problem updating official in database.",
+            ex.getMessage(), ex);
+      } catch (Throwable t) {
+        ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+      }
+    }
+  };
 
   private void addOfficial() {
     Official official = new Official();
@@ -207,32 +239,6 @@ public class AdminController {
       JOptionPane.showMessageDialog(manageOfficialsDataPanel,
           "Please select an official", "No row selected",
           JOptionPane.WARNING_MESSAGE);
-    }
-  }
-
-  class StaffTableModelListener implements TableModelListener {
-
-    @Override
-    public void tableChanged(TableModelEvent e) {
-      if (e.getColumn() == -1) {
-        return;
-      }
-      int row = e.getFirstRow();
-      Staff staffMember = staffMembersTableModel.getStaffMember(row);
-      if (staffMember != null) {
-        try {
-          Staff dbStaffMember = m_dbConnection
-              .getStaffById(staffMember.getId());
-          if (!staffMember.hasEqualData(dbStaffMember)) {
-            m_dbConnection.updateStaffMember(staffMember);
-          }
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem updating staff member in database.",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
     }
   }
 
@@ -317,7 +323,7 @@ public class AdminController {
     }
   }
 
-  public void removeStaff() {
+  private void removeStaff() {
     int row = manageTeamDataPanel.getSelectedStaffRow();
     if (row != -1) {
       Staff staffMember = staffMembersTableModel.getStaffMember(row);
@@ -345,32 +351,7 @@ public class AdminController {
     }
   }
 
-  class PlayersTableModelListener implements TableModelListener {
-
-    @Override
-    public void tableChanged(TableModelEvent e) {
-      if (e.getColumn() == -1) {
-        return;
-      }
-      int row = e.getFirstRow();
-      Player player = playersTableModel.getPlayer(row);
-      if (player != null) {
-        try {
-          Player dbPlayer = m_dbConnection.getPlayerById(player.getId());
-          if (!player.hasEqualData(dbPlayer)) {
-            m_dbConnection.updatePlayer(player);
-          }
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem updating player in database.",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
-    }
-  }
-
-  public void addPlayer() {
+  private void addPlayer() {
     Player player = new Player();
     try {
       int playerId = m_dbConnection.insertPlayer(player,
@@ -385,7 +366,7 @@ public class AdminController {
     }
   }
 
-  public void deletePlayer() {
+  private void deletePlayer() {
     int row = manageTeamDataPanel.getSelectedPlayerRow();
     if (row != -1) {
       Player player = playersTableModel.getPlayer(row);

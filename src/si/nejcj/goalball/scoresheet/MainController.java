@@ -5,13 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -27,25 +22,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
-import org.apache.commons.lang3.BooleanUtils;
-import org.xml.sax.SAXException;
 
 import si.nejcj.goalball.scoresheet.admin.AdminController;
 import si.nejcj.goalball.scoresheet.db.DatabaseConnection;
-import si.nejcj.goalball.scoresheet.db.entity.Official;
-import si.nejcj.goalball.scoresheet.db.entity.OfficialLevel;
-import si.nejcj.goalball.scoresheet.db.entity.Player;
-import si.nejcj.goalball.scoresheet.db.entity.Staff;
-import si.nejcj.goalball.scoresheet.db.entity.Team;
 import si.nejcj.goalball.scoresheet.db.entity.Tournament;
 import si.nejcj.goalball.scoresheet.exception.technical.InternalTechnicalException;
 import si.nejcj.goalball.scoresheet.tournament.TournamentController;
@@ -55,7 +34,6 @@ import si.nejcj.goalball.scoresheet.tournament.panel.TournamentPanel;
 import si.nejcj.goalball.scoresheet.util.Constants;
 import si.nejcj.goalball.scoresheet.util.ErrorHandler;
 import si.nejcj.goalball.scoresheet.util.SwingAction;
-import si.nejcj.goalball.scoresheet.util.UpdateHandler;
 import si.nejcj.goalball.scoresheet.util.panel.HtmlPanel;
 import si.nejcj.goalball.scoresheet.util.pdf.TournamentDataUtil;
 import si.nejcj.goalball.scoresheet.util.pdf.TournamentRefereesUtil;
@@ -87,7 +65,6 @@ public class MainController {
           m_classLoader.getResource("images/64x64/Scoresheet.png")).getImage());
 
       initDatabase();
-      initData();
 
       m_adminController = new AdminController(m_dbConnection, m_classLoader);
       m_tournamentController = new TournamentController(m_dbConnection,
@@ -122,20 +99,6 @@ public class MainController {
           System.getProperty(Constants.USER_HOME_PROPERTY_NAME));
     } catch (InternalTechnicalException e) {
       ErrorHandler.sysErr("Problem loading the database", e.getMessage(), e);
-    }
-  }
-
-  private void initData() {
-    String firstRun = m_dbConnection
-        .getConfiguration(Constants.PROPERTY_FIRST_RUN);
-    if (firstRun == null || BooleanUtils.toBoolean(firstRun)) {
-      InputStream xmlData = m_classLoader
-          .getResourceAsStream("data/initialData.xml");
-      InputStream validationXmlData = m_classLoader
-          .getResourceAsStream("data/initialData.xml");
-      updateAppData(validationXmlData, xmlData);
-      m_dbConnection.updateOrAddConfiguration(Constants.PROPERTY_FIRST_RUN,
-          "false");
     }
   }
 
@@ -210,9 +173,7 @@ public class MainController {
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     JMenuItem manageAppData = new JMenuItem(new MbManageAppDataAction());
-    JMenuItem updateDbData = new JMenuItem(new MbUpdateDatabaseDataAction());
     toolsMenu.add(manageAppData);
-    toolsMenu.add(updateDbData);
     menuBar.add(toolsMenu);
 
     // Reports menu
@@ -342,24 +303,22 @@ public class MainController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      optionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == optionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer) {
-              if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                dialog.setVisible(false);
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer) {
+            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              dialog.setVisible(false);
+              return;
+            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+              if (selectTournamentPanel.getSelectedRow() == -1) {
+                ErrorHandler.userErr("Please select a tournament");
+                dialog.setVisible(true);
                 return;
-              } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                if (selectTournamentPanel.getSelectedRow() == -1) {
-                  ErrorHandler.userErr("Please select a tournament");
-                  dialog.setVisible(true);
-                  return;
-                }
-                dialog.setVisible(false);
               }
+              dialog.setVisible(false);
             }
           }
         }
@@ -406,31 +365,27 @@ public class MainController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
-
-          if (e.getSource() == optionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer) {
-              if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                dialog.setVisible(false);
+      optionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer) {
+            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              dialog.setVisible(false);
+              return;
+            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+              if (selectTournamentPanel.getSelectedRow() == -1) {
+                ErrorHandler.userErr("Please select a tournament to delete");
+                dialog.setVisible(true);
                 return;
-              } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                if (selectTournamentPanel.getSelectedRow() == -1) {
-                  ErrorHandler.userErr("Please select a tournament to delete");
-                  dialog.setVisible(true);
-                  return;
-                }
-                dialog.setVisible(false);
               }
+              dialog.setVisible(false);
             }
           }
         }
       });
       dialog.pack();
       dialog.setVisible(true);
-
       Integer value = (Integer) optionPane.getValue();
       if (value != null && value == JOptionPane.OK_OPTION) {
         Tournament selectedTournament = tournamentDataTableModel
@@ -477,97 +432,6 @@ public class MainController {
     @Override
     public void actionPerformed(ActionEvent event) {
       m_adminController.displayManageAppDataPanel();
-    }
-  }
-
-  @SuppressWarnings("serial")
-  class MbUpdateDatabaseDataAction extends AbstractAction {
-    public MbUpdateDatabaseDataAction() {
-      super("Update Database Data");
-      putValue(Action.SMALL_ICON,
-          new ImageIcon(m_classLoader.getResource("images/16x16/Update.png")));
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-      // TODO: Data should be obtained from update page
-      // InputStream xmlData = m_classLoader
-      // .getResourceAsStream("data/initialData.xml");
-      // InputStream validationXmlData = m_classLoader
-      // .getResourceAsStream("data/initialData.xml");
-      // updateAppData(validationXmlData, xmlData);
-    }
-  }
-
-  @Deprecated
-  private void updateAppData(InputStream validationXmlData,
-      InputStream xmlData) {
-    try {
-      SchemaFactory factory = SchemaFactory
-          .newInstance("http://www.w3.org/2001/XMLSchema");
-      Source schemaLocation = new StreamSource(
-          m_classLoader.getResourceAsStream("data/dataUpdateSchema.xsd"));
-      Schema schema = factory.newSchema(schemaLocation);
-      Validator validator = schema.newValidator();
-      Source source = new StreamSource(validationXmlData);
-      validator.validate(source);
-
-      UpdateHandler handler = new UpdateHandler();
-      SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-      parser.parse(xmlData, handler);
-
-      // TODO: Admin data cannot be deleted due to tournament constraints
-      m_dbConnection.deleteAdminData();
-      for (Official official : handler.getOfficials()) {
-        OfficialLevel level = m_dbConnection
-            .getOfficialLevelByName(official.getOfficialLevel().getLevelName());
-        official.setOfficialLevel(level);
-        official.setAdminData(true);
-        m_dbConnection.insertOfficial(official);
-      }
-
-      Map<Team, List<Staff>> teamStaff = handler.getTeamStaff();
-
-      for (Team team : teamStaff.keySet()) {
-        Team dbTeam = m_dbConnection.getTeamByNameAndCountry(team.getTeamName(),
-            team.getCountry());
-        if (dbTeam == null) {
-          team.setAdminData(true);
-          Integer teamId = m_dbConnection.insertTeam(team);
-          dbTeam = team;
-          dbTeam.setId(teamId);
-        }
-
-        List<Staff> staff = teamStaff.get(team);
-        for (Staff staffMember : staff) {
-          staffMember.setAdminData(true);
-          m_dbConnection.insertStaffMember(staffMember, dbTeam.getId());
-        }
-      }
-
-      Map<Team, List<Player>> teamPlayers = handler.getTeamPlayers();
-      for (Team team : teamPlayers.keySet()) {
-        Team dbTeam = m_dbConnection.getTeamByNameAndCountry(team.getTeamName(),
-            team.getCountry());
-        if (dbTeam == null) {
-          team.setAdminData(true);
-          Integer teamId = m_dbConnection.insertTeam(team);
-          dbTeam = team;
-          dbTeam.setId(teamId);
-        }
-
-        List<Player> players = teamPlayers.get(team);
-        for (Player player : players) {
-          player.setAdminData(true);
-          m_dbConnection.insertPlayer(player, dbTeam.getId());
-        }
-      }
-    } catch (ParserConfigurationException e) {
-      ErrorHandler.sysErr("Error updating application data", e.getMessage(), e);
-    } catch (SAXException e) {
-      ErrorHandler.sysErr("Error updating application data", e.getMessage(), e);
-    } catch (IOException e) {
-      ErrorHandler.sysErr("Error updating application data", e.getMessage(), e);
     }
   }
 }

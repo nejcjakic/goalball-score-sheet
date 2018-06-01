@@ -9,7 +9,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.InputStream;
@@ -43,7 +42,6 @@ import javax.swing.table.TableModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.poi.hssf.record.DBCellRecord;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -117,13 +115,13 @@ public class TournamentController {
   public TournamentPanel initTournamentPanel() {
     Map<TournamentListeners, EventListener> tournamentPanelListeners = new HashMap<TournamentListeners, EventListener>();
     tournamentPanelListeners.put(TournamentListeners.TOURNAMENT_NAME,
-        new TournamentNameCaretListener());
+        tournamentNameCaretListener);
     tournamentPanelListeners.put(TournamentListeners.TOURNAMENT_LOCATION,
-        new TournamentLocationCaretListener());
+        tournamentLocationCaretListener);
     tournamentPanelListeners.put(TournamentListeners.TOURNAMENT_START_DATE,
-        new StartDateChangeListener());
+        startDateChangeListener);
     tournamentPanelListeners.put(TournamentListeners.TOURNAMENT_END_DATE,
-        new EndDateChangeListener());
+        endDateChangeListener);
     m_tournamentPanel = new TournamentPanel(tournamentPanelListeners);
     return m_tournamentPanel;
   }
@@ -145,7 +143,7 @@ public class TournamentController {
     m_tournamentPanel.setTournamentGamesPanel(initTournamentGamesPanel());
   }
 
-  public void importTournamentGames(File file, Integer tournamentId)
+  private void importTournamentGames(File file, Integer tournamentId)
       throws Exception {
     Tournament tournament = m_dbConnection.getTournamentById(tournamentId);
 
@@ -391,81 +389,65 @@ public class TournamentController {
     return dates;
   }
 
-  class TournamentNameCaretListener implements CaretListener {
+  private CaretListener tournamentNameCaretListener = e -> {
+    String tournamentName = ((JTextField) e.getSource()).getText();
+    try {
+      m_tournament.setTournamentName(tournamentName);
+      m_dbConnection.updateTournament(m_tournament);
+    } catch (InternalTechnicalException ex) {
+      ErrorHandler.sysErr("Problem updating tournament name", ex.getMessage(),
+          ex);
+    } catch (Throwable t) {
+      ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+    }
+  };
 
-    @Override
-    public void caretUpdate(CaretEvent e) {
-      String tournamentName = ((JTextField) e.getSource()).getText();
+  private CaretListener tournamentLocationCaretListener = e -> {
+    String tournamentLocation = ((JTextField) e.getSource()).getText();
+    try {
+      m_tournament.setLocation(tournamentLocation);
+      m_dbConnection.updateTournament(m_tournament);
+    } catch (InternalTechnicalException ex) {
+      ErrorHandler.sysErr("Problem updating tournament location",
+          ex.getMessage(), ex);
+    } catch (Throwable t) {
+      ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
+    }
+  };
+
+  private PropertyChangeListener startDateChangeListener = evt -> {
+    Object value = evt.getNewValue();
+    if (value instanceof Date) {
+      Date startDate = (Date) value;
       try {
-        m_tournament.setTournamentName(tournamentName);
+        m_tournamentPanel.setStartDate(startDate);
+        m_tournament.setStartDate(startDate);
         m_dbConnection.updateTournament(m_tournament);
       } catch (InternalTechnicalException ex) {
-        ErrorHandler.sysErr("Problem updating tournament name", ex.getMessage(),
+        ErrorHandler.sysErr("Problem updating tournament date", ex.getMessage(),
             ex);
       } catch (Throwable t) {
         ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
     }
-  }
+  };
 
-  class TournamentLocationCaretListener implements CaretListener {
-
-    @Override
-    public void caretUpdate(CaretEvent e) {
-      String tournamentLocation = ((JTextField) e.getSource()).getText();
+  private PropertyChangeListener endDateChangeListener = evt -> {
+    Object value = evt.getNewValue();
+    if (value instanceof Date) {
+      Date endDate = (Date) value;
       try {
-        m_tournament.setLocation(tournamentLocation);
+        m_tournamentPanel.setEndDate(endDate);
+        m_tournament.setEndDate(endDate);
         m_dbConnection.updateTournament(m_tournament);
       } catch (InternalTechnicalException ex) {
-        ErrorHandler.sysErr("Problem updating tournament location",
-            ex.getMessage(), ex);
+        ErrorHandler.sysErr("Problem updating tournament date", ex.getMessage(),
+            ex);
       } catch (Throwable t) {
         ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
       }
     }
-  }
-
-  class StartDateChangeListener implements PropertyChangeListener {
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      Object value = evt.getNewValue();
-      if (value instanceof Date) {
-        Date startDate = (Date) value;
-        try {
-          m_tournamentPanel.setStartDate(startDate);
-          m_tournament.setStartDate(startDate);
-          m_dbConnection.updateTournament(m_tournament);
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem updating tournament date",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
-    }
-  }
-
-  class EndDateChangeListener implements PropertyChangeListener {
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      Object value = evt.getNewValue();
-      if (value instanceof Date) {
-        Date endDate = (Date) value;
-        try {
-          m_tournamentPanel.setEndDate(endDate);
-          m_tournament.setEndDate(endDate);
-          m_dbConnection.updateTournament(m_tournament);
-        } catch (InternalTechnicalException ex) {
-          ErrorHandler.sysErr("Problem updating tournament date",
-              ex.getMessage(), ex);
-        } catch (Throwable t) {
-          ErrorHandler.sysErr("Unexpected error", t.getMessage(), t);
-        }
-      }
-    }
-  }
+  };
 
   private void editTeam() {
     int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
@@ -500,43 +482,41 @@ public class TournamentController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      optionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == optionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer) {
-              if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                dialog.setVisible(false);
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer) {
+            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              dialog.setVisible(false);
+              return;
+            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+              List<TournamentPlayer> selectedPlayers = playersTableModel
+                  .getSelectedPlayers();
+              if (selectedPlayers == null || selectedPlayers.size() < 3) {
+                ErrorHandler.userErr("At least 3 players must be selected");
+                dialog.setVisible(true);
                 return;
-              } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                List<TournamentPlayer> selectedPlayers = playersTableModel
-                    .getSelectedPlayers();
-                if (selectedPlayers == null || selectedPlayers.size() < 3) {
-                  ErrorHandler.userErr("At least 3 players must be selected");
+              }
+              List<Integer> selectedNumbers = new ArrayList<Integer>();
+              for (TournamentPlayer player : selectedPlayers) {
+                Integer playerNumber = player.getPlayerNumber();
+                if (playerNumber == null) {
+                  ErrorHandler
+                      .userErr("All players must have a number selected");
                   dialog.setVisible(true);
                   return;
                 }
-                List<Integer> selectedNumbers = new ArrayList<Integer>();
-                for (TournamentPlayer player : selectedPlayers) {
-                  Integer playerNumber = player.getPlayerNumber();
-                  if (playerNumber == null) {
-                    ErrorHandler
-                        .userErr("All players must have a number selected");
-                    dialog.setVisible(true);
-                    return;
-                  }
-                  if (selectedNumbers.contains(playerNumber)) {
-                    ErrorHandler
-                        .userErr("Two players cannot have the same number");
-                    dialog.setVisible(true);
-                    return;
-                  }
-                  selectedNumbers.add(playerNumber);
+                if (selectedNumbers.contains(playerNumber)) {
+                  ErrorHandler
+                      .userErr("Two players cannot have the same number");
+                  dialog.setVisible(true);
+                  return;
                 }
-                dialog.setVisible(false);
+                selectedNumbers.add(playerNumber);
               }
+              dialog.setVisible(false);
             }
           }
         }
@@ -587,7 +567,7 @@ public class TournamentController {
     }
   }
 
-  public void addTeam() {
+  private void addTeam() {
     int selectedRow = m_tournamentPanel.getSelectedAllTeamsRow();
     if (selectedRow != -1) {
       Team team = m_allTeamsTableModel.getTeam(selectedRow);
@@ -613,43 +593,41 @@ public class TournamentController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      optionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == optionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer) {
-              if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                dialog.setVisible(false);
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer) {
+            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              dialog.setVisible(false);
+              return;
+            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+              List<TournamentPlayer> selectedPlayers = playersTableModel
+                  .getSelectedPlayers();
+              if (selectedPlayers == null || selectedPlayers.size() < 3) {
+                ErrorHandler.userErr("At least 3 players must be selected");
+                dialog.setVisible(true);
                 return;
-              } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                List<TournamentPlayer> selectedPlayers = playersTableModel
-                    .getSelectedPlayers();
-                if (selectedPlayers == null || selectedPlayers.size() < 3) {
-                  ErrorHandler.userErr("At least 3 players must be selected");
+              }
+              List<Integer> selectedNumbers = new ArrayList<Integer>();
+              for (TournamentPlayer player : selectedPlayers) {
+                Integer playerNumber = player.getPlayerNumber();
+                if (playerNumber == null) {
+                  ErrorHandler
+                      .userErr("All players must have a number selected");
                   dialog.setVisible(true);
                   return;
                 }
-                List<Integer> selectedNumbers = new ArrayList<Integer>();
-                for (TournamentPlayer player : selectedPlayers) {
-                  Integer playerNumber = player.getPlayerNumber();
-                  if (playerNumber == null) {
-                    ErrorHandler
-                        .userErr("All players must have a number selected");
-                    dialog.setVisible(true);
-                    return;
-                  }
-                  if (selectedNumbers.contains(playerNumber)) {
-                    ErrorHandler
-                        .userErr("Two players cannot have the same number");
-                    dialog.setVisible(true);
-                    return;
-                  }
-                  selectedNumbers.add(playerNumber);
+                if (selectedNumbers.contains(playerNumber)) {
+                  ErrorHandler
+                      .userErr("Two players cannot have the same number");
+                  dialog.setVisible(true);
+                  return;
                 }
-                dialog.setVisible(false);
+                selectedNumbers.add(playerNumber);
               }
+              dialog.setVisible(false);
             }
           }
         }
@@ -686,7 +664,7 @@ public class TournamentController {
     }
   }
 
-  public void removeTeam() {
+  private void removeTeam() {
     int selectedRow = m_tournamentPanel.getSelectedParticipatingTeamsRow();
     if (selectedRow != -1) {
       Team team = m_tournamentTeamsTableModel.getTeam(selectedRow);
@@ -827,24 +805,22 @@ public class TournamentController {
       }
     });
 
-    optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent e) {
-        String prop = e.getPropertyName();
+    optionPane.addPropertyChangeListener(e -> {
+      String prop = e.getPropertyName();
 
-        if (e.getSource() == optionPane
-            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-          if (e.getNewValue() instanceof Integer) {
-            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-              dialog.setVisible(false);
+      if (e.getSource() == optionPane
+          && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+        if (e.getNewValue() instanceof Integer) {
+          if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+            dialog.setVisible(false);
+            return;
+          } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+            if (!tournamentGame.hasValidData()) {
+              ErrorHandler.userErr("All required data must be selected");
+              dialog.setVisible(true);
               return;
-            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-              if (!tournamentGame.hasValidData()) {
-                ErrorHandler.userErr("All required data must be selected");
-                dialog.setVisible(true);
-                return;
-              }
-              dialog.setVisible(false);
             }
+            dialog.setVisible(false);
           }
         }
       }
@@ -968,24 +944,21 @@ public class TournamentController {
         }
       });
 
-      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
-
-          if (e.getSource() == optionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer) {
-              if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-                dialog.setVisible(false);
+      optionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer) {
+            if ((Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+              dialog.setVisible(false);
+              return;
+            } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
+              if (!tournamentGame.hasValidData()) {
+                ErrorHandler.userErr("All required data must be selected");
+                dialog.setVisible(true);
                 return;
-              } else if ((Integer) e.getNewValue() == JOptionPane.OK_OPTION) {
-                if (!tournamentGame.hasValidData()) {
-                  ErrorHandler.userErr("All required data must be selected");
-                  dialog.setVisible(true);
-                  return;
-                }
-                dialog.setVisible(false);
               }
+              dialog.setVisible(false);
             }
           }
         }
@@ -1452,19 +1425,17 @@ public class TournamentController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      gameSelectionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      gameSelectionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == gameSelectionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer
-                && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-              gameSelectionDialog.setVisible(false);
-              return;
-            }
+        if (e.getSource() == gameSelectionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer
+              && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
             gameSelectionDialog.setVisible(false);
+            return;
           }
+          gameSelectionDialog.setVisible(false);
         }
       });
       gameSelectionDialog.pack();
@@ -1592,33 +1563,31 @@ public class TournamentController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      optionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == optionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer
-                && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-              dialog.setVisible(false);
-              return;
-            }
-            String[] teamAScorers = gameResultsPanel.getScorersTeamA().trim()
-                .split("\\s+");
-            String[] teamBScorers = gameResultsPanel.getScorersTeamB().trim()
-                .split("\\s+");
-            if (validatePlayerNumbers(teamAScorers, teamAPlayers)
-                && validatePlayerNumbers(teamBScorers, teamBPlayers)) {
-              gameResultsPanel.setErrorText(null);
-              dialog.setVisible(false);
-              return;
-            }
-
-            // Input not valid
-            gameResultsPanel
-                .setErrorText("Enter number of scorers separated by spaces");
-            dialog.setVisible(true);
+        if (e.getSource() == optionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer
+              && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
+            dialog.setVisible(false);
+            return;
           }
+          String[] teamAScorers = gameResultsPanel.getScorersTeamA().trim()
+              .split("\\s+");
+          String[] teamBScorers = gameResultsPanel.getScorersTeamB().trim()
+              .split("\\s+");
+          if (validatePlayerNumbers(teamAScorers, teamAPlayers)
+              && validatePlayerNumbers(teamBScorers, teamBPlayers)) {
+            gameResultsPanel.setErrorText(null);
+            dialog.setVisible(false);
+            return;
+          }
+
+          // Input not valid
+          gameResultsPanel
+              .setErrorText("Enter number of scorers separated by spaces");
+          dialog.setVisible(true);
         }
       });
       dialog.pack();
@@ -1990,19 +1959,17 @@ public class TournamentController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      venueOptionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      venueOptionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == venueOptionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer
-                && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-              venueDialog.setVisible(false);
-              return;
-            }
+        if (e.getSource() == venueOptionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer
+              && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
             venueDialog.setVisible(false);
+            return;
           }
+          venueDialog.setVisible(false);
         }
       });
       venueDialog.pack();
@@ -2087,19 +2054,17 @@ public class TournamentController {
           // Window can only be closed by pressing OK or Cancel
         }
       });
-      venueOptionPane.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent e) {
-          String prop = e.getPropertyName();
+      venueOptionPane.addPropertyChangeListener(e -> {
+        String prop = e.getPropertyName();
 
-          if (e.getSource() == venueOptionPane
-              && prop.equals(JOptionPane.VALUE_PROPERTY)) {
-            if (e.getNewValue() instanceof Integer
-                && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
-              venueDialog.setVisible(false);
-              return;
-            }
+        if (e.getSource() == venueOptionPane
+            && prop.equals(JOptionPane.VALUE_PROPERTY)) {
+          if (e.getNewValue() instanceof Integer
+              && (Integer) e.getNewValue() == JOptionPane.CANCEL_OPTION) {
             venueDialog.setVisible(false);
+            return;
           }
+          venueDialog.setVisible(false);
         }
       });
       venueDialog.pack();
