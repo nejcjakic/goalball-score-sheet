@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.JOptionPane;
 
@@ -943,11 +944,12 @@ public class DatabaseConnection {
    *           If problem with database occurs.
    */
   public TournamentPlayer getTournamentPlayer(Integer playerId) {
-    String query = "SELECT tp.id, tp.player_number as playernumber, p.last_name as lastname, p.first_name as firstname, t.team_name as teamName"
+    String query = "SELECT tp.id, tp.player_number as playernumber, p.last_name as lastname, p.first_name as firstname, t.is_male as male, "
+        + " t.team_name as teamName"
         + " FROM tournament_player tp, player p, team t WHERE tp.player_id = p.id AND p.team_id = t.id AND tp.id = ?";
     try {
       return queryRunner.query(query,
-          new BeanHandler<TournamentPlayer>(TournamentPlayer.class), playerId);
+          new BeanHandler<>(TournamentPlayer.class), playerId);
     } catch (SQLException e) {
       throw new InternalTechnicalException(
           "Error while retrieving tournament player from database.", e);
@@ -1185,58 +1187,7 @@ public class DatabaseConnection {
       ResultSet rs = executeQuery(queryBuilder.toString(), params);
       List<TournamentGame> tournamentGames = new ArrayList<TournamentGame>();
       while (rs.next()) {
-        Integer id = rs.getInt("id");
-        Integer gameNumber = rs.getInt("game_no");
-        Date gameDate = rs.getDate("game_date");
-        String gameTime = rs.getString("game_time");
-        String pool = rs.getString("pool");
-        venue = rs.getString("venue");
-        String gender = rs.getString("gender");
-        boolean needsWinner = rs.getBoolean("needs_winner");
-        Integer tournamentTeamAId = rs.getInt("team_a_id");
-        TournamentTeam tournamentTeamA = getTournamentTeamById(
-            tournamentTeamAId);
-        Integer tournamentTeamBId = rs.getInt("team_b_id");
-        TournamentTeam tournamentTeamB = getTournamentTeamById(
-            tournamentTeamBId);
-        Integer referee1Id = rs.getInt("referee_1_id");
-        TournamentOfficial referee1 = getTournamentOfficialById(referee1Id);
-        Integer referee2Id = rs.getInt("referee_2_id");
-        TournamentOfficial referee2 = getTournamentOfficialById(referee2Id);
-        Integer tenSec1Id = rs.getInt("ten_sec_1_id");
-        TournamentOfficial tenSeconds1 = getTournamentOfficialById(tenSec1Id);
-        Integer tenSec2Id = rs.getInt("ten_sec_2_id");
-        TournamentOfficial tenSeconds2 = getTournamentOfficialById(tenSec2Id);
-        Integer scoredId = rs.getInt("scorer_id");
-        TournamentOfficial scorer = getTournamentOfficialById(scoredId);
-        Integer timerId = rs.getInt("timer_id");
-        TournamentOfficial timer = getTournamentOfficialById(timerId);
-        Integer backupTimerId = rs.getInt("backup_timer_id");
-        TournamentOfficial backupTimer = getTournamentOfficialById(
-            backupTimerId);
-        Integer goalJudge1Id = rs.getInt("goal_judge_1_id");
-        TournamentOfficial goalJudge1 = getTournamentOfficialById(goalJudge1Id);
-        Integer goalJudge2Id = rs.getInt("goal_judge_2_id");
-        TournamentOfficial goalJudge2 = getTournamentOfficialById(goalJudge2Id);
-        Integer goalJudge3Id = rs.getInt("goal_judge_3_id");
-        TournamentOfficial goalJudge3 = getTournamentOfficialById(goalJudge3Id);
-        Integer goalJudge4Id = rs.getInt("goal_judge_4_id");
-        TournamentOfficial goalJudge4 = getTournamentOfficialById(goalJudge4Id);
-        Integer scoreTeamA = null;
-        if (rs.getObject("score_team_a") != null) {
-          scoreTeamA = rs.getInt("score_team_a");
-        }
-        Integer scoreTeamB = null;
-        if (rs.getObject("score_team_b") != null) {
-          scoreTeamB = rs.getInt("score_team_b");
-        }
-
-        tournamentGames.add(new TournamentGame(id,
-            getTournamentById(tournamentId), gameNumber, gameDate, gameTime,
-            pool, venue, gender, needsWinner, tournamentTeamA, tournamentTeamB,
-            referee1, referee2, tenSeconds1, tenSeconds2, scorer, timer,
-            backupTimer, goalJudge1, goalJudge2, goalJudge3, goalJudge4,
-            scoreTeamA, scoreTeamB));
+        tournamentGames.add(buildTournamentGame(rs));
       }
 
       return tournamentGames;
@@ -1264,64 +1215,88 @@ public class DatabaseConnection {
       ResultSet rs = executeQuery(query, params);
 
       if (rs.next()) {
-        Integer id = rs.getInt("id");
-        Integer tournamentId = rs.getInt("tournament_id");
-        Integer gameNumber = rs.getInt("game_no");
-        Date gameDate = rs.getDate("game_date");
-        String gameTime = rs.getString("game_time");
-        String pool = rs.getString("pool");
-        String venue = rs.getString("venue");
-        String gender = rs.getString("gender");
-        boolean needsWinner = rs.getBoolean("needs_winner");
-        Integer tournamentTeamAId = rs.getInt("team_a_id");
-        TournamentTeam tournamentTeamA = getTournamentTeamById(
-            tournamentTeamAId);
-        Integer tournamentTeamBId = rs.getInt("team_b_id");
-        TournamentTeam tournamentTeamB = getTournamentTeamById(
-            tournamentTeamBId);
-        Integer referee1Id = rs.getInt("referee_1_id");
-        TournamentOfficial referee1 = getTournamentOfficialById(referee1Id);
-        Integer referee2Id = rs.getInt("referee_2_id");
-        TournamentOfficial referee2 = getTournamentOfficialById(referee2Id);
-        Integer tenSec1Id = rs.getInt("ten_sec_1_id");
-        TournamentOfficial tenSeconds1 = getTournamentOfficialById(tenSec1Id);
-        Integer tenSec2Id = rs.getInt("ten_sec_2_id");
-        TournamentOfficial tenSeconds2 = getTournamentOfficialById(tenSec2Id);
-        Integer scoredId = rs.getInt("scorer_id");
-        TournamentOfficial scorer = getTournamentOfficialById(scoredId);
-        Integer timerId = rs.getInt("timer_id");
-        TournamentOfficial timer = getTournamentOfficialById(timerId);
-        Integer backupTimerId = rs.getInt("backup_timer_id");
-        TournamentOfficial backupTimer = getTournamentOfficialById(
-            backupTimerId);
-        Integer goalJudge1Id = rs.getInt("goal_judge_1_id");
-        TournamentOfficial goalJudge1 = getTournamentOfficialById(goalJudge1Id);
-        Integer goalJudge2Id = rs.getInt("goal_judge_2_id");
-        TournamentOfficial goalJudge2 = getTournamentOfficialById(goalJudge2Id);
-        Integer goalJudge3Id = rs.getInt("goal_judge_3_id");
-        TournamentOfficial goalJudge3 = getTournamentOfficialById(goalJudge3Id);
-        Integer goalJudge4Id = rs.getInt("goal_judge_4_id");
-        TournamentOfficial goalJudge4 = getTournamentOfficialById(goalJudge4Id);
-        Integer scoreTeamA = null;
-        if (rs.getObject("score_team_a") != null) {
-          scoreTeamA = rs.getInt("score_team_a");
-        }
-        Integer scoreTeamB = null;
-        if (rs.getObject("score_team_b") != null) {
-          scoreTeamB = rs.getInt("score_team_b");
-        }
-
-        return new TournamentGame(id, getTournamentById(tournamentId),
-            gameNumber, gameDate, gameTime, pool, venue, gender, needsWinner,
-            tournamentTeamA, tournamentTeamB, referee1, referee2, tenSeconds1,
-            tenSeconds2, scorer, timer, backupTimer, goalJudge1, goalJudge2,
-            goalJudge3, goalJudge4, scoreTeamA, scoreTeamB);
+        return buildTournamentGame(rs);
       }
       return null;
     } catch (SQLException e) {
       throw new InternalTechnicalException(
           "Error while retrieving tournament games from database.", e);
     }
+  }
+
+  public Optional<TournamentGame> getTournamentGame(Integer gameNumber,
+      String gameTime, TournamentTeam teamA, TournamentTeam teaamB) {
+    String query = "SELECT * from tournament_game WHERE game_no = ? and game_time = ? "
+        + "and team_a_id = ? and team_b_id = ?";
+    List<String> params = new ArrayList<>();
+    params.add(gameNumber.toString());
+    params.add(gameTime);
+    params.add(teamA.getId().toString());
+    params.add(teaamB.getId().toString());
+
+    try {
+      ResultSet rs = executeQuery(query, params);
+
+      if (rs.next()) {
+        return Optional.of(buildTournamentGame(rs));
+      }
+      return Optional.empty();
+    } catch (SQLException e) {
+      throw new InternalTechnicalException(
+          "Error while retrieving tournament games from database.", e);
+    }
+  }
+
+  private TournamentGame buildTournamentGame(ResultSet rs) throws SQLException {
+    Integer id = rs.getInt("id");
+    Integer tournamentId = rs.getInt("tournament_id");
+    Integer gameNumber = rs.getInt("game_no");
+    Date gameDate = rs.getDate("game_date");
+    String gameTime = rs.getString("game_time");
+    String pool = rs.getString("pool");
+    String venue = rs.getString("venue");
+    String gender = rs.getString("gender");
+    boolean needsWinner = rs.getBoolean("needs_winner");
+    Integer tournamentTeamAId = rs.getInt("team_a_id");
+    TournamentTeam tournamentTeamA = getTournamentTeamById(tournamentTeamAId);
+    Integer tournamentTeamBId = rs.getInt("team_b_id");
+    TournamentTeam tournamentTeamB = getTournamentTeamById(tournamentTeamBId);
+    Integer referee1Id = rs.getInt("referee_1_id");
+    TournamentOfficial referee1 = getTournamentOfficialById(referee1Id);
+    Integer referee2Id = rs.getInt("referee_2_id");
+    TournamentOfficial referee2 = getTournamentOfficialById(referee2Id);
+    Integer tenSec1Id = rs.getInt("ten_sec_1_id");
+    TournamentOfficial tenSeconds1 = getTournamentOfficialById(tenSec1Id);
+    Integer tenSec2Id = rs.getInt("ten_sec_2_id");
+    TournamentOfficial tenSeconds2 = getTournamentOfficialById(tenSec2Id);
+    Integer scoredId = rs.getInt("scorer_id");
+    TournamentOfficial scorer = getTournamentOfficialById(scoredId);
+    Integer timerId = rs.getInt("timer_id");
+    TournamentOfficial timer = getTournamentOfficialById(timerId);
+    Integer backupTimerId = rs.getInt("backup_timer_id");
+    TournamentOfficial backupTimer = getTournamentOfficialById(backupTimerId);
+    Integer goalJudge1Id = rs.getInt("goal_judge_1_id");
+    TournamentOfficial goalJudge1 = getTournamentOfficialById(goalJudge1Id);
+    Integer goalJudge2Id = rs.getInt("goal_judge_2_id");
+    TournamentOfficial goalJudge2 = getTournamentOfficialById(goalJudge2Id);
+    Integer goalJudge3Id = rs.getInt("goal_judge_3_id");
+    TournamentOfficial goalJudge3 = getTournamentOfficialById(goalJudge3Id);
+    Integer goalJudge4Id = rs.getInt("goal_judge_4_id");
+    TournamentOfficial goalJudge4 = getTournamentOfficialById(goalJudge4Id);
+    Integer scoreTeamA = null;
+    if (rs.getObject("score_team_a") != null) {
+      scoreTeamA = rs.getInt("score_team_a");
+    }
+    Integer scoreTeamB = null;
+    if (rs.getObject("score_team_b") != null) {
+      scoreTeamB = rs.getInt("score_team_b");
+    }
+
+    return new TournamentGame(id, getTournamentById(tournamentId), gameNumber,
+        gameDate, gameTime, pool, venue, gender, needsWinner, tournamentTeamA,
+        tournamentTeamB, referee1, referee2, tenSeconds1, tenSeconds2, scorer,
+        timer, backupTimer, goalJudge1, goalJudge2, goalJudge3, goalJudge4,
+        scoreTeamA, scoreTeamB);
   }
 
   public Map<TournamentOfficial, List<RefereeGame>> getRefereeGames(

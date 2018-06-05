@@ -100,6 +100,7 @@ public class TournamentGamesTableModel extends AbstractTableModel {
   }
 
   public void addTournamentGames(List<TournamentGame> tournamentGames) {
+    allGames.clear();
     allGames.addAll(tournamentGames);
     Collections.sort(allGames);
     fireTableDataChanged();

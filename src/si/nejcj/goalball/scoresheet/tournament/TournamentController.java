@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -104,7 +106,7 @@ public class TournamentController {
   private TournamentOfficialsTableModel m_allOfficialsTableModel;
   private TournamentGamesTableModel m_tournamentGamesTableModel;
   private static final Integer[] ALLOWED_PLAYER_NUMBERS = { null, 1, 2, 3, 4, 5,
-      6, 7, 8, 9 };
+      6, 7, 8, 9, 0 };
 
   public TournamentController(DatabaseConnection databaseConnection,
       ClassLoader classLoader) {
@@ -268,7 +270,16 @@ public class TournamentController {
             .get();
       }
 
-      TournamentGame game = new TournamentGame();
+      Optional<TournamentGame> gameOptional = m_dbConnection.getTournamentGame(
+          Integer.parseInt(gameNumber), time, tournamentTeamA, tournamentTeamB);
+      boolean shouldUpdate = false;
+      TournamentGame game;
+      if (gameOptional.isPresent()) {
+        shouldUpdate = true;
+        game = gameOptional.get();
+      } else {
+        game = new TournamentGame();
+      }
       game.setGameNumber(Integer.parseInt(gameNumber));
       game.setGameDate(format.parse(date));
       game.setGameTime(time);
@@ -289,7 +300,11 @@ public class TournamentController {
       game.setGoalJudge2(goalJudge2);
       game.setGoalJudge3(goalJudge3);
       game.setGoalJudge4(goalJudge4);
-      m_dbConnection.insertTournamentGame(game);
+      if (shouldUpdate) {
+        m_dbConnection.updateTournamentGame(game);
+      } else {
+        m_dbConnection.insertTournamentGame(game);
+      }
     }
 
     List<TournamentGame> tournamentGames = m_dbConnection
@@ -1545,9 +1560,11 @@ public class TournamentController {
       TournamentGame tournamentGame = m_tournamentGamesTableModel
           .getTournamentGame(selectedRow);
       final List<Integer> teamAPlayers = m_dbConnection
-          .getTournamentTeamPlayerNumbers(tournamentGame.getTeamA().getId());
+          .getTournamentTeamPlayerNumbers(tournamentGame.getTeamA().getId())
+          .stream().filter(number -> number != 0).collect(Collectors.toList());
       final List<Integer> teamBPlayers = m_dbConnection
-          .getTournamentTeamPlayerNumbers(tournamentGame.getTeamB().getId());
+          .getTournamentTeamPlayerNumbers(tournamentGame.getTeamB().getId())
+          .stream().filter(number -> number != 0).collect(Collectors.toList());
       final GameResultsPanel gameResultsPanel = new GameResultsPanel(
           tournamentGame.getTeamA().getDisplayName(),
           tournamentGame.getTeamB().getDisplayName());
@@ -1675,11 +1692,6 @@ public class TournamentController {
 
     public void actionPerformed(ActionEvent event) {
       try {
-        if (m_tournamentGamesTableModel.getRowCount() != 0) {
-          ErrorHandler
-              .userErr("Games can only be imported to an empty tournament");
-          return;
-        }
         JFileChooser choice = new JFileChooser();
         int option = choice.showOpenDialog(m_tournamentPanel);
 

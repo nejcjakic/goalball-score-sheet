@@ -9,8 +9,8 @@ public class TournamentPlayer extends Player {
   }
 
   public TournamentPlayer(Integer id, String lastName, String firstName,
-      Integer playerNumber, String teamName) {
-    super(id, lastName, firstName);
+      boolean isMale, Integer playerNumber, String teamName) {
+    super(id, lastName, firstName, isMale);
     this.playerNumber = playerNumber;
   }
 

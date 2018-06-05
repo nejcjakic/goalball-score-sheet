@@ -3,14 +3,16 @@ package si.nejcj.goalball.scoresheet.db.entity;
 public class Player extends BasicEntity<Player> {
   protected String lastName;
   protected String firstName;
+  protected boolean isMale;
 
   public Player() {
   }
 
-  public Player(Integer id, String lastName, String firstName) {
+  public Player(Integer id, String lastName, String firstName, boolean isMale) {
     this.id = id;
     this.lastName = lastName;
     this.firstName = firstName;
+    this.isMale = isMale;
   }
 
   public String getLastName() {
@@ -27,6 +29,14 @@ public class Player extends BasicEntity<Player> {
 
   public void setFirstName(String firstName) {
     this.firstName = firstName;
+  }
+
+  public boolean isMale() {
+    return isMale;
+  }
+
+  public void setMale(boolean isMale) {
+    this.isMale = isMale;
   }
 
   public String getFullName() {

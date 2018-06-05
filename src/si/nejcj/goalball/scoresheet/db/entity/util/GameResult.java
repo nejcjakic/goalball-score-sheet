@@ -2,7 +2,7 @@ package si.nejcj.goalball.scoresheet.db.entity.util;
 
 public class GameResult implements Comparable<GameResult> {
 
-  public static final String GENERAL_GAME = "GROUP";
+  public static final String GENERAL_GAME = "POOL";
 
   private String teamName;
   private int points = 0;

@@ -70,14 +70,6 @@ public class TournamentDataUtil extends PdfUtil {
     for (TournamentTeam key : sortedKeys) {
       printTeamStatistics(key, teamGames.get(key));
     }
-
-    // Map<TournamentTeam, List<TournamentGame>> gamesByTeam = tournamentGames
-    // .stream().collect(
-    // Collectors.groupingBy(TournamentGame::getTeamA,
-    // Collectors.groupingBy(TournamentGame::getTeamB)));
-
-    // Collectors.groupingBy(TournamentGame::getTeamA,
-    // Collectors.groupingBy(TournamentGame::getTeamB)));
   }
 
   private static void printTeamStatistics(TournamentTeam team,
@@ -107,10 +99,6 @@ public class TournamentDataUtil extends PdfUtil {
         String.format("Hall1: '%s', Hall2: '%s'", hall1Games, hall2Games));
     System.out.println();
     System.out.println();
-
-    // TournamentTeam tournamentTeamA = tournamentTeams.stream().filter(
-    // t -> t.getSimpleName().equals(homeTeam) && t.isMale() == isMaleGame)
-    // .findFirst().get();
   }
 
   public static void createGamesSchedule(File file,
@@ -259,7 +247,7 @@ public class TournamentDataUtil extends PdfUtil {
     try {
       Rectangle a4Size = PageSize.A4;
       Document document = new Document(
-          new Rectangle(a4Size.getWidth(), a4Size.getHeight()), 5, 5, 20, 20);
+          new Rectangle(a4Size.getWidth(), a4Size.getHeight()), 20, 20, 20, 20);
       PdfWriter.getInstance(document, new FileOutputStream(file));
       document.open();
 
@@ -395,11 +383,20 @@ public class TournamentDataUtil extends PdfUtil {
       }
 
       document.add(new Paragraph(" "));
-      document.add(new Paragraph("Top scorers"));
+      document.add(new Paragraph("Top scorers (male)"));
       document.add(new Paragraph(" "));
 
-      PdfPTable topScorersTable = createTopScorersTable(tournamentScorers);
-      document.add(topScorersTable);
+      PdfPTable topScorersTableMale = createTopScorersTable(tournamentScorers,
+          true);
+      document.add(topScorersTableMale);
+
+      document.add(new Paragraph(" "));
+      document.add(new Paragraph("Top scorers (female)"));
+      document.add(new Paragraph(" "));
+
+      PdfPTable topScorersTableFemale = createTopScorersTable(tournamentScorers,
+          false);
+      document.add(topScorersTableFemale);
 
       document.close();
     } catch (IOException e) {
@@ -436,8 +433,9 @@ public class TournamentDataUtil extends PdfUtil {
   }
 
   private static PdfPTable createTopScorersTable(
-      final Map<TournamentPlayer, Integer> tournamentScorers)
+      final Map<TournamentPlayer, Integer> tournamentScorers, boolean male)
       throws DocumentException {
+
     PdfPTable topScorersTable = new PdfPTable(3);
     topScorersTable.setWidthPercentage(30);
     topScorersTable.setWidths(new float[] { 5f, 4f, 2f });
@@ -446,18 +444,11 @@ public class TournamentDataUtil extends PdfUtil {
     topScorersTable.addCell(new Phrase("Team", TITLE_ROW_FONT));
     topScorersTable.addCell(new Phrase("Goals", TITLE_ROW_FONT));
 
-    Set<Entry<TournamentPlayer, Integer>> entries = tournamentScorers
-        .entrySet();
-    List<Entry<TournamentPlayer, Integer>> scorersList = new ArrayList<Map.Entry<TournamentPlayer, Integer>>(
-        entries);
-    Collections.sort(scorersList,
-        new Comparator<Map.Entry<TournamentPlayer, Integer>>() {
-          @Override
-          public int compare(Entry<TournamentPlayer, Integer> o1,
-              Entry<TournamentPlayer, Integer> o2) {
-            return o2.getValue().compareTo(o1.getValue());
-          }
-        });
+    List<Entry<TournamentPlayer, Integer>> scorersList = tournamentScorers
+        .entrySet().stream().filter(e -> e.getKey().isMale() == male)
+        .sorted(Collections.reverseOrder(Comparator.comparing(Entry::getValue)))
+        .collect(Collectors.toList());
+
     for (Map.Entry<TournamentPlayer, Integer> entry : scorersList) {
       TournamentPlayer player = entry.getKey();
       topScorersTable.addCell(new Phrase(player.getFullName(), DATA_ROW_FONT));

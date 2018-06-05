@@ -50,9 +50,8 @@ public class TournamentRefereesUtil extends PdfUtil {
 
       PdfPTable table = new PdfPTable(14);
       table.setWidthPercentage(100);
-      
-      table.setWidths(
-          new int[] { 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 });
+
+      table.setWidths(new int[] { 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 });
 
       table.addCell(new Phrase("Time", TITLE_ROW_FONT));
       table.addCell(new Phrase("Team 1", TITLE_ROW_FONT));
@@ -125,11 +124,42 @@ public class TournamentRefereesUtil extends PdfUtil {
       PdfWriter.getInstance(document, new FileOutputStream(file));
       document.open();
 
-      for (TournamentOfficial official : refereeGames.keySet()) {
+      Set<TournamentOfficial> officials = refereeGames.keySet();
+      Comparator<TournamentOfficial> officialsSorter = (a, b) -> a
+          .getOfficialLevel().toString()
+          .compareTo(b.getOfficialLevel().toString());
+      officialsSorter = officialsSorter
+          .thenComparing(TournamentOfficial::getDisplayName);
+      List<TournamentOfficial> sortedOfficials = new ArrayList<>(officials);
+      Collections.sort(sortedOfficials, officialsSorter);
+      for (TournamentOfficial official : sortedOfficials) {
         document.add(new Paragraph(official.getFullName()));
         document.add(new Paragraph(" "));
 
         List<RefereeGame> games = refereeGames.get(official);
+        Comparator<RefereeGame> refGameComparator = new Comparator<RefereeGame>() {
+          @Override
+          public int compare(RefereeGame game1, RefereeGame game2) {
+            if (game1.getGameDate().equals(game2.getGameDate())) {
+              String game1Time = game1.getGameTime();
+              String game2Time = game2.getGameTime();
+              Integer game1Hour = Integer
+                  .parseInt(game1Time.split(":")[0].trim());
+              Integer game2Hour = Integer
+                  .parseInt(game2Time.split(":")[0].trim());
+              if (game1Hour.equals(game2Hour)) {
+                Integer game1Minute = Integer
+                    .parseInt(game1Time.split(":")[1].trim());
+                Integer game2Minute = Integer
+                    .parseInt(game2Time.split(":")[1].trim());
+                return game1Minute.compareTo(game2Minute);
+              }
+              return game1Hour.compareTo(game2Hour);
+            }
+            return game1.getGameDate().compareTo(game2.getGameDate());
+          }
+        };
+        Collections.sort(games, refGameComparator);
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(50);
 
@@ -222,7 +252,8 @@ public class TournamentRefereesUtil extends PdfUtil {
         System.err.println(
             game.getGameNumber() + " " + game.getReferee1().getFullName()
                 + " : " + game.getReferee2().getFullName());
-        System.err.println(game.getTeamA().getCountry()+" "+game.getTeamB().getCountry());
+        System.err.println(
+            game.getTeamA().getCountry() + " " + game.getTeamB().getCountry());
       }
       if (teamACountry.equalsIgnoreCase(tenSec1Country)
           || teamACountry.equalsIgnoreCase(tenSec2Country)
@@ -232,7 +263,8 @@ public class TournamentRefereesUtil extends PdfUtil {
         System.err.println(
             game.getGameNumber() + " " + game.getTenSeconds1().getFullName()
                 + " : " + game.getTenSeconds2().getFullName());
-        System.err.println(game.getTeamA().getCountry()+" "+game.getTeamB().getCountry());
+        System.err.println(
+            game.getTeamA().getCountry() + " " + game.getTeamB().getCountry());
       }
       if (ref1Country.equalsIgnoreCase(ref2Country)) {
         System.err.println("REF COUNTRY MISMATCH");
@@ -640,7 +672,7 @@ public class TournamentRefereesUtil extends PdfUtil {
     Collections.sort(sortedKeys,
         (o1, o2) -> o1.getLastName().compareTo(o2.getLastName()));
 
-    table.addCell(official.getFullName());// TODO: Switch to display name
+    table.addCell(official.getDisplayName());
     for (TournamentOfficial pair : sortedKeys) {
       table.addCell(matrix.get(pair).toString());
     }

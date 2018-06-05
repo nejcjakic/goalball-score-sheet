@@ -1,13 +1,79 @@
 package si.nejcj.goalball.scoresheet.util.pdf;
 
-import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.*;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_BACK_UP_TIMER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_DATE_OF_GAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_DIVISION_POOL;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_GAME_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_GENDER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_GOAL_JUDGE_1;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_GOAL_JUDGE_2;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_GOAL_JUDGE_3;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_GOAL_JUDGE_4;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_REFEREE_FAR_SIDE;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_REFEREE_TABLE_SIDE;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_SCORER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_1_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_1_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_1_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_2_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_2_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_2_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_3_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_3_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_3_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_4_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_4_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_4_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_5_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_5_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_5_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_6_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_6_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_PLAYER_6_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_SHORT_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_STAFF_1_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_STAFF_1_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_STAFF_2_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_STAFF_2_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_STAFF_3_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_A_STAFF_3_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_1_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_1_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_1_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_2_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_2_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_2_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_3_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_3_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_3_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_4_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_4_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_4_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_5_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_5_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_5_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_6_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_6_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_PLAYER_6_NUMBER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_SHORT_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_STAFF_1_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_STAFF_1_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_STAFF_2_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_STAFF_2_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_STAFF_3_FIRST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEAM_B_STAFF_3_LAST_NAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEN_SEC_TIMER_1;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TEN_SEC_TIMER_2;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TIMER;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_TIME_OF_GAME;
+import static si.nejcj.goalball.scoresheet.util.pdf.PdfFieldConstants.FIELD_VENUE;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import si.nejcj.goalball.scoresheet.db.entity.TournamentGame;
 import si.nejcj.goalball.scoresheet.db.entity.TournamentPlayer;
@@ -83,42 +149,42 @@ public class PdfFieldConverter {
     for (TournamentPlayer player : teamAPlayers) {
       if (loopCount == 1) {
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_1_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_1_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_1_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 2) {
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_2_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_2_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_2_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 3) {
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_3_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_3_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_3_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 4) {
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_4_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_4_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_4_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 5) {
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_5_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_5_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_5_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 6) {
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_6_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_6_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_A_PLAYER_6_FIRST_NAME,
@@ -155,42 +221,42 @@ public class PdfFieldConverter {
     for (TournamentPlayer player : teamBPlayers) {
       if (loopCount == 1) {
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_1_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_1_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_1_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 2) {
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_2_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_2_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_2_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 3) {
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_3_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_3_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_3_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 4) {
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_4_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_4_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_4_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 5) {
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_5_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_5_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_5_FIRST_NAME,
             player.getFirstName());
       } else if (loopCount == 6) {
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_6_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_6_LAST_NAME,
             player.getLastName());
         gameInformationMap.put(FIELD_TEAM_B_PLAYER_6_FIRST_NAME,
@@ -224,6 +290,14 @@ public class PdfFieldConverter {
     return gameInformationMap;
   }
 
+  private static String convertPlayerNumber(TournamentPlayer player) {
+    Integer playerNumber = player.getPlayerNumber();
+    if (playerNumber == 0) {
+      return "NP";
+    }
+    return playerNumber.toString();
+  }
+
   public static Map<String, String> createLineUpSheetMap(String teamName,
       List<TournamentPlayer> teamPlayers, List<TournamentStaff> teamStaff) {
     Map<String, String> dataMap = new HashMap<String, String>();
@@ -235,32 +309,32 @@ public class PdfFieldConverter {
     for (TournamentPlayer player : teamPlayers) {
       if (loopCount == 1) {
         dataMap.put(FIELD_TEAM_A_PLAYER_1_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         dataMap.put(FIELD_TEAM_A_PLAYER_1_LAST_NAME, player.getLastName());
         dataMap.put(FIELD_TEAM_A_PLAYER_1_FIRST_NAME, player.getFirstName());
       } else if (loopCount == 2) {
         dataMap.put(FIELD_TEAM_A_PLAYER_2_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         dataMap.put(FIELD_TEAM_A_PLAYER_2_LAST_NAME, player.getLastName());
         dataMap.put(FIELD_TEAM_A_PLAYER_2_FIRST_NAME, player.getFirstName());
       } else if (loopCount == 3) {
         dataMap.put(FIELD_TEAM_A_PLAYER_3_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         dataMap.put(FIELD_TEAM_A_PLAYER_3_LAST_NAME, player.getLastName());
         dataMap.put(FIELD_TEAM_A_PLAYER_3_FIRST_NAME, player.getFirstName());
       } else if (loopCount == 4) {
         dataMap.put(FIELD_TEAM_A_PLAYER_4_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         dataMap.put(FIELD_TEAM_A_PLAYER_4_LAST_NAME, player.getLastName());
         dataMap.put(FIELD_TEAM_A_PLAYER_4_FIRST_NAME, player.getFirstName());
       } else if (loopCount == 5) {
         dataMap.put(FIELD_TEAM_A_PLAYER_5_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         dataMap.put(FIELD_TEAM_A_PLAYER_5_LAST_NAME, player.getLastName());
         dataMap.put(FIELD_TEAM_A_PLAYER_5_FIRST_NAME, player.getFirstName());
       } else if (loopCount == 6) {
         dataMap.put(FIELD_TEAM_A_PLAYER_6_NUMBER,
-            player.getPlayerNumber().toString());
+            convertPlayerNumber(player));
         dataMap.put(FIELD_TEAM_A_PLAYER_6_LAST_NAME, player.getLastName());
         dataMap.put(FIELD_TEAM_A_PLAYER_6_FIRST_NAME, player.getFirstName());
       }
